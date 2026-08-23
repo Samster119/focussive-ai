@@ -112,7 +112,7 @@ html[data-time-theme='night'] .zen-dashboard {
   flex-wrap: wrap;
   gap: 16px;
   position: relative;
-  z-index: 1;
+  z-index: 1000;
 }
 .zen-dashboard .greet {
   display: flex;
@@ -771,6 +771,7 @@ html[data-time-theme='night'] .zen-dashboard .recharts-area-curve {
 /* ================= SCENE SELECTOR ================= */
 .zen-dashboard .scene-selector {
   position: relative;
+  z-index: 1000;
 }
 
 /* Pill trigger */
