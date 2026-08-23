@@ -205,42 +205,18 @@ function Scene({ id, p }: { id: TimePeriod; p: ScenePalette }) {
   );
 }
 
-export default function TimeBackground() {
-  /* Use the shared ThemeContext when available; fall back to local
-     clock state so TimeBackground still works if rendered outside
-     a ThemeProvider (e.g. in tests or Storybook). */
-  let contextResolved: TimePeriod | null = null;
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { resolved } = require('@/lib/themeContext').useTheme();
-    contextResolved = resolved as TimePeriod;
-  } catch {
-    /* ThemeContext not available */
-  }
-
-  const [clockPeriod, setClockPeriod] = useState<TimePeriod | null>(null);
-
-  /* Fallback clock — only used when ThemeContext is unavailable */
-  useEffect(() => {
-    if (contextResolved !== null) return;
-    const update = () => setClockPeriod(getTimePeriod());
-    update();
-    const id = setInterval(update, 60_000);
-    return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const period: TimePeriod | null = contextResolved ?? clockPeriod;
-
+/* Inner component that consumes ThemeContext — always rendered
+   inside ThemeProvider (via AppLayout). */
+function TimeBackgroundInner({ resolved }: { resolved: TimePeriod }) {
   /* Expose the resolved theme to CSS */
   useEffect(() => {
-    if (period) document.documentElement.setAttribute('data-time-theme', period);
-  }, [period]);
+    document.documentElement.setAttribute('data-time-theme', resolved);
+  }, [resolved]);
 
   return (
     <div className="tb-root" aria-hidden="true">
       {PERIODS.map((key) => (
-        <div key={key} className={`tb-scene${period === key ? ' active' : ''}`}>
+        <div key={key} className={`tb-scene${resolved === key ? ' active' : ''}`}>
           <Scene id={key} p={PALETTES[key]} />
         </div>
       ))}
@@ -252,4 +228,15 @@ export default function TimeBackground() {
       <div className="tb-veil" />
     </div>
   );
+}
+
+/* Thin wrapper that reads from ThemeContext. ThemeProvider is always
+   an ancestor (mounted in AppLayout), so the context is always present. */
+export default function TimeBackground() {
+  // Dynamic import to avoid a circular-dependency at module parse time
+  // (TimeBackground is imported by AppLayout; themeContext imports from
+  // TimeBackground for the TimePeriod type only, which is fine at runtime).
+  const { useTheme } = require('@/lib/themeContext') as typeof import('@/lib/themeContext');
+  const { resolved } = useTheme();
+  return <TimeBackgroundInner resolved={resolved} />;
 }
