@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import FloatingDock from './FloatingDock';
 import AuthGuard from './AuthGuard';
+import TimeBackground from './TimeBackground';
 import { registerServiceWorker } from '@/lib/notifications';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -37,6 +38,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthGuard>
+      <TimeBackground />
       <div className="flex flex-col min-h-screen pb-32">
         <main className="flex-1 w-full max-w-[1440px] mx-auto p-layout_margin min-h-screen">
           {children}
