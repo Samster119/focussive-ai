@@ -1,0 +1,223 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum EventType {
+  TASK
+  FOCUS
+  BREAK
+  MANUAL
+}
+
+enum Sender {
+  USER
+  AI
+  SYSTEM
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  createdAt    DateTime @default(now())
+
+  settings          UserSettings?
+  gamification      GamificationStats?
+  tasks             Task[]
+  calendarEvents    CalendarEvent[]
+  timetableBlocks   TimetableBlock[]
+  diaries           DailyDiary[]
+  reports           WeeklyReport[]
+  burnoutLogs       BurnoutLog[]
+  conversations     Conversation[]
+  focusSessions     FocusSession[]
+  userBadges        UserBadge[]
+}
+
+model UserSettings {
+  id                   String  @id @default(uuid()) @db.Uuid
+  userId               String  @unique @db.Uuid
+  assistantPersonality String  @default("balanced")
+  burnoutThresholdScore Float  @default(75.0)
+  workStartHour        Int     @default(9)
+  workEndHour          Int     @default(18)
+  enablePushNotifications Boolean @default(false)
+  breakReminders       Boolean @default(true)
+  burnoutAlerts        Boolean @default(true)
+  eventReminders       Boolean @default(true)
+  pushSubscription     Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model GamificationStats {
+  id           String  @id @default(uuid()) @db.Uuid
+  userId       String  @unique @db.Uuid
+  currentLevel Int     @default(1)
+  currentXP    Int     @default(0)
+  streakDays   Int     @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Task {
+  id                 String       @id @default(uuid()) @db.Uuid
+  userId             String       @db.Uuid
+  title              String
+  status             TaskStatus   @default(PENDING)
+  priority           TaskPriority @default(MEDIUM)
+  estimatedMinutes   Int?
+  dueDate            DateTime?
+  parentTaskId       String?      @db.Uuid
+  schedulingRationale String?
+  postponementCount  Int          @default(0)
+  createdAt          DateTime     @default(now())
+
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentTask  Task?           @relation("TaskSubtasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subTasks    Task[]          @relation("TaskSubtasks")
+  calendarEvent CalendarEvent?
+  focusSessions FocusSession[]
+  timetableBlocks TimetableBlock[]
+}
+
+model CalendarEvent {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  taskId    String?   @unique @db.Uuid
+  startTime DateTime
+  endTime   DateTime
+  type      EventType @default(TASK)
+  rationale String?
+  isFixed   Boolean   @default(false)
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+}
+
+model TimetableBlock {
+  id           String @id @default(uuid()) @db.Uuid
+  userId       String @db.Uuid
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  activityType String
+  taskId       String? @db.Uuid
+  templateId   String? @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+}
+
+model DailyDiary {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @db.Uuid
+  date                DateTime
+  generatedSummary    String?
+  userEditedSummary   String?
+  moodLog             Json?
+  createdAt           DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model WeeklyReport {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @db.Uuid
+  weekStartDate     DateTime
+  completionRate    Float?
+  burnoutRiskAverage Float?
+  focusHoursTotal   Float?
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStartDate])
+}
+
+model BurnoutLog {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @db.Uuid
+  calculatedScore     Float
+  workloadDensityRatio Float?
+  loggedAt            DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Conversation {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  createdAt DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+}
+
+model Message {
+  id                String   @id @default(uuid()) @db.Uuid
+  conversationId    String   @db.Uuid
+  sender            Sender
+  content           String
+  extractedMetadata Json?
+  createdAt         DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model FocusSession {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  taskId          String?  @db.Uuid
+  durationMinutes Int
+  completedAt     DateTime @default(now())
+  xpEarned        Int      @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+}
+
+model Badge {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String
+  icon        String?
+  criteria    Json
+  createdAt   DateTime @default(now())
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  badgeId    String   @db.Uuid
+  unlockedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+}

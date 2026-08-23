@@ -1,0 +1,757 @@
+/* ============================================================
+   Tasks Page — Zen Atmosphere (matches Dashboard)
+   All styles scoped to .zen-tasks
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap');
+
+/* Transparent & non-scrollable body when tasks page is mounted */
+html:has(body.zen-tasks-bg),
+body.zen-tasks-bg,
+body.zen-tasks-bg.bg-background {
+  background-color: transparent !important;
+  background: transparent !important;
+  overflow: hidden !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+}
+
+body.zen-tasks-bg div.pb-32 {
+  padding-bottom: 0 !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+}
+
+body.zen-tasks-bg main {
+  padding-top: 16px !important;
+  padding-bottom: 84px !important; /* space above floating dock */
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* ── Root vars (same palette as dashboard) ── */
+.zen-tasks {
+  --glass:        rgba(255,255,255,.20);
+  --glass-2:      rgba(255,255,255,.30);
+  --glass-3:      rgba(255,255,255,.50);
+  --glass-dark:   rgba(28,36,32,.42);
+  --border:       rgba(255,255,255,.45);
+  --border-dark:  rgba(255,255,255,.16);
+  --text-0:  #243029;
+  --text-1:  #44544a;
+  --text-2:  #66766c;
+  --sage:    #5c8a72;
+  --sage-dk: #3f6350;
+  --gold:    #d69a4c;
+  --rose:    #c97b6f;
+  --plum:    #8577a8;
+  --radius:  20px;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  color: var(--text-0);
+  font-family: 'Inter', 'Manrope', sans-serif;
+}
+
+/* ================= ZEN NATURE BACKGROUND ================= */
+.zen-tasks .scene {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.zen-tasks .scene svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.zen-tasks .mist {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.zen-tasks .mist span {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,0) 70%);
+  filter: blur(6px);
+  animation: ztasks-drift 38s ease-in-out infinite;
+}
+.zen-tasks .mist span:nth-child(1) { width: 520px; height: 180px; top: 58%; left: -10%; animation-delay: 0s; }
+.zen-tasks .mist span:nth-child(2) { width: 420px; height: 150px; top: 68%; left: 40%; animation-delay: -12s; }
+.zen-tasks .mist span:nth-child(3) { width: 600px; height: 200px; top: 50%; left: 60%; animation-delay: -24s; }
+
+@keyframes ztasks-drift {
+  0%   { transform: translateX(0) translateY(0); opacity: .55; }
+  50%  { transform: translateX(60px) translateY(-10px); opacity: .85; }
+  100% { transform: translateX(0) translateY(0); opacity: .55; }
+}
+
+/* ── Glass base ── */
+.zen-tasks .glass {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 48px -20px rgba(40,60,45,.22),
+              inset 0 1px 0 rgba(255,255,255,.5);
+}
+.zen-tasks .glass-2 {
+  background: var(--glass-2);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px -12px rgba(40,60,45,.15),
+              inset 0 1px 0 rgba(255,255,255,.45);
+}
+
+/* ════════════════════ HEADER ════════════════════ */
+.zen-tasks .tasks-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.zen-tasks .tasks-title {
+  font-family: 'Fraunces', serif;
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--text-0);
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 12px rgba(255,255,255,.4);
+}
+.zen-tasks .tasks-subtitle {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+
+.zen-tasks .btn-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--sage), var(--sage-dk));
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(92,138,114,.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+.zen-tasks .btn-add:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(92,138,114,.38);
+}
+.zen-tasks .btn-add:active { transform: translateY(0); }
+
+/* ════════════════════ STATS ROW ════════════════════ */
+.zen-tasks .stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+@media (max-width: 600px) {
+  .zen-tasks .stats-row { grid-template-columns: 1fr; }
+}
+.zen-tasks .stat-card {
+  padding: 18px 22px;
+}
+.zen-tasks .stat-label {
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.zen-tasks .stat-number {
+  font-family: 'Fraunces', serif;
+  font-size: 34px;
+  font-weight: 500;
+  color: var(--text-0);
+  line-height: 1;
+}
+.zen-tasks .stat-number.overdue { color: var(--rose); }
+.zen-tasks .stat-number.done    { color: var(--sage); }
+.zen-tasks .stat-number.pending { color: var(--gold); }
+
+/* ════════════════════ FILTER TABS ════════════════════ */
+.zen-tasks .filter-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.zen-tasks .filter-tab {
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: var(--glass-2);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text-1);
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+.zen-tasks .filter-tab:hover {
+  background: var(--glass-3);
+  color: var(--text-0);
+}
+.zen-tasks .filter-tab.active {
+  background: linear-gradient(135deg, var(--sage), var(--sage-dk));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(92,138,114,.25);
+}
+
+/* ════════════════════ ADD TASK FORM ════════════════════ */
+.zen-tasks .add-form {
+  padding: 24px;
+  margin-bottom: 18px;
+  animation: ztasks-fadeUp 0.35s cubic-bezier(0.22,1,0.36,1) both;
+}
+.zen-tasks .form-title {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--text-0);
+  margin-bottom: 16px;
+}
+.zen-tasks .form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.zen-tasks .form-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .zen-tasks .form-grid-4 { grid-template-columns: 1fr 1fr; }
+}
+.zen-tasks .form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  margin-bottom: 5px;
+}
+.zen-tasks .form-input,
+.zen-tasks .form-select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.45);
+  border: 1px solid rgba(255,255,255,.5);
+  font-size: 14px;
+  color: var(--text-0);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.zen-tasks .form-input:focus,
+.zen-tasks .form-select:focus {
+  border-color: rgba(92,138,114,.5);
+  box-shadow: 0 0 0 3px rgba(92,138,114,.1);
+}
+.zen-tasks .form-input::placeholder { color: var(--text-2); opacity: .7; }
+
+.zen-tasks .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+.zen-tasks .btn-cancel {
+  padding: 9px 20px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.25);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-family: inherit;
+}
+.zen-tasks .btn-cancel:hover { background: rgba(255,255,255,.4); }
+.zen-tasks .btn-save {
+  padding: 9px 22px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--sage), var(--sage-dk));
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(92,138,114,.25);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  font-family: inherit;
+}
+.zen-tasks .btn-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(92,138,114,.35);
+}
+
+/* Flex-shrink fixed sections */
+.zen-tasks .tasks-header,
+.zen-tasks .stats-row,
+.zen-tasks .filter-tabs,
+.zen-tasks .add-form {
+  flex-shrink: 0;
+}
+
+/* ════════════════════ TASK CONTENT SCROLL AREA ════════════════════ */
+.zen-tasks .task-content-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 12px;
+  padding-right: 2px;
+
+  /* Completely hide scrollbars while keeping scroll functionality */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.zen-tasks .task-content-area::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* ════════════════════ TASK LIST ════════════════════ */
+.zen-tasks .task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Task card */
+.zen-tasks .task-card {
+  padding: 16px 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  animation: ztasks-fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+.zen-tasks .task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 56px -20px rgba(40,60,45,.28),
+              inset 0 1px 0 rgba(255,255,255,.5);
+}
+
+/* Priority accent line on left edge */
+.zen-tasks .task-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  transition: opacity 0.2s ease;
+}
+.zen-tasks .task-card.priority-urgent::before { background: var(--rose); }
+.zen-tasks .task-card.priority-high::before   { background: var(--gold); }
+.zen-tasks .task-card.priority-medium::before { background: var(--plum); }
+.zen-tasks .task-card.priority-low::before    { background: var(--sage); }
+
+.zen-tasks .task-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Checkbox */
+.zen-tasks .task-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 2px solid var(--sage);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+}
+.zen-tasks .task-check:hover {
+  background: rgba(92,138,114,.12);
+  transform: scale(1.1);
+}
+.zen-tasks .task-check.checked {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+.zen-tasks .task-check.archived-check {
+  border-color: var(--text-2);
+}
+
+/* Title */
+.zen-tasks .task-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-0);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.zen-tasks .task-title.done-title {
+  text-decoration: line-through;
+  color: var(--text-2);
+  font-weight: 400;
+}
+
+/* Meta row */
+.zen-tasks .task-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-2);
+  margin-top: 2px;
+}
+.zen-tasks .task-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.zen-tasks .task-meta-item .material-symbols-outlined {
+  font-size: 13px;
+}
+.zen-tasks .meta-overdue { color: var(--rose); font-weight: 600; }
+.zen-tasks .meta-today   { color: var(--sage); font-weight: 600; }
+
+/* Progress dots for subtasks */
+.zen-tasks .subtask-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.zen-tasks .subtask-progress-track {
+  flex: 1;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.3);
+  overflow: hidden;
+  max-width: 100px;
+}
+.zen-tasks .subtask-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--sage), var(--gold));
+  transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+.zen-tasks .subtask-progress-text {
+  font-size: 11px;
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+/* Priority badge */
+.zen-tasks .priority-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.zen-tasks .priority-badge.urgent { background: rgba(201,123,111,.18); color: var(--rose); }
+.zen-tasks .priority-badge.high   { background: rgba(214,154,76,.18);  color: var(--gold); }
+.zen-tasks .priority-badge.medium { background: rgba(133,119,168,.18); color: var(--plum); }
+.zen-tasks .priority-badge.low    { background: rgba(92,138,114,.15);  color: var(--sage); }
+
+/* Action buttons row */
+.zen-tasks .task-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+.zen-tasks .task-card:hover .task-actions { opacity: 1; }
+
+.zen-tasks .act-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-1);
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+.zen-tasks .act-btn:hover { background: rgba(255,255,255,.55); color: var(--sage); }
+.zen-tasks .act-btn.danger:hover { background: rgba(201,123,111,.15); color: var(--rose); }
+.zen-tasks .act-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.zen-tasks .act-btn-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,.3);
+  color: var(--text-1);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+.zen-tasks .act-btn-label:hover { background: rgba(255,255,255,.55); color: var(--sage); }
+.zen-tasks .act-btn-label:disabled { opacity: 0.4; cursor: not-allowed; }
+.zen-tasks .act-btn-label.restore { color: var(--sage); }
+
+/* ════════════════════ MICRO-STEPS ════════════════════ */
+.zen-tasks .subtask-list {
+  margin-top: 8px;
+  margin-left: 36px;
+  padding-left: 16px;
+  border-left: 2px solid rgba(92,138,114,.2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: ztasks-fadeUp 0.3s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+.zen-tasks .subtask-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,.25);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+}
+.zen-tasks .subtask-title {
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-0);
+}
+.zen-tasks .subtask-title.done { text-decoration: line-through; color: var(--text-2); font-weight: 400; }
+.zen-tasks .subtask-dur {
+  font-size: 11.5px;
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+.zen-tasks .subtask-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid rgba(92,138,114,.5);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  padding: 0;
+  font-family: inherit;
+}
+.zen-tasks .subtask-check:hover { background: rgba(92,138,114,.1); }
+.zen-tasks .subtask-check.checked { background: var(--sage); border-color: var(--sage); }
+
+/* ════════════════════ EMPTY STATE ════════════════════ */
+.zen-tasks .empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-2);
+}
+.zen-tasks .empty-icon {
+  font-size: 48px;
+  color: rgba(92,138,114,.3);
+  display: block;
+  margin-bottom: 12px;
+}
+.zen-tasks .empty-text {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-1);
+  margin-bottom: 4px;
+}
+.zen-tasks .empty-sub {
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+
+/* ════════════════════ LOADING ════════════════════ */
+.zen-tasks .loading-state {
+  text-align: center;
+  padding: 56px 24px;
+  color: var(--text-2);
+}
+
+/* Skeleton shimmer */
+.zen-tasks .skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.18) 25%,
+    rgba(255,255,255,.32) 50%,
+    rgba(255,255,255,.18) 75%);
+  background-size: 200% 100%;
+  animation: ztasks-shimmer 1.6s ease-in-out infinite;
+  border-radius: 10px;
+}
+@keyframes ztasks-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ════════════════════ EDIT MODAL ════════════════════ */
+.zen-tasks .modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(20, 32, 26, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: ztasks-fadeIn 0.25s ease both;
+}
+.zen-tasks .modal-box {
+  width: 100%;
+  max-width: 520px;
+  padding: 28px;
+  animation: ztasks-fadeUp 0.3s cubic-bezier(0.22,1,0.36,1) both;
+}
+.zen-tasks .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,.3);
+}
+.zen-tasks .modal-title {
+  font-family: 'Fraunces', serif;
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--text-0);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.zen-tasks .modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.3);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-1);
+  transition: background 0.2s ease;
+  font-family: inherit;
+}
+.zen-tasks .modal-close:hover { background: rgba(255,255,255,.5); color: var(--text-0); }
+.zen-tasks .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.3);
+}
+
+/* ════════════════════ TOAST ════════════════════ */
+.zen-tasks .toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  padding: 12px 24px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 40px rgba(40,60,45,.15);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-0);
+  white-space: nowrap;
+  animation: ztasks-slideDown 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* ════════════════════ ANIMATIONS ════════════════════ */
+@keyframes ztasks-fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ztasks-fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ztasks-slideDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(-14px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Stagger delays */
+.zen-tasks .zd-1 { animation-delay: 0.04s; }
+.zen-tasks .zd-2 { animation-delay: 0.08s; }
+.zen-tasks .zd-3 { animation-delay: 0.12s; }
+.zen-tasks .zd-4 { animation-delay: 0.16s; }
+.zen-tasks .zd-5 { animation-delay: 0.20s; }
+.zen-tasks .zd-6 { animation-delay: 0.24s; }
+.zen-tasks .zd-7 { animation-delay: 0.28s; }
+.zen-tasks .zd-8 { animation-delay: 0.32s; }
+.zen-tasks .zd-9 { animation-delay: 0.36s; }
+.zen-tasks .zd-10 { animation-delay: 0.40s; }

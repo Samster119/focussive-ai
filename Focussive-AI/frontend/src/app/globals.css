@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Manrope", sans-serif;
+  background-color: #f8f9ff;
+  color: #0b1c30;
+  min-height: 100vh;
+}
+
+.card-shadow {
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+}
+
+.timeline-track {
+  position: relative;
+}
+
+.timeline-track::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e2e8f0;
+  z-index: 0;
+}
+
+.timeline-node {
+  position: relative;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.timeline-node.done {
+  border-color: #4a0edc;
+  background: #633bf310;
+  color: #4a0edc;
+}
+
+.timeline-node.current {
+  border-color: #4a0edc;
+  background: #4a0edc;
+  color: white;
+}
+
+.border-glow-card {
+  --edge-proximity: 0;
+  --cursor-angle: 45deg;
+  --edge-sensitivity: 30;
+  --color-sensitivity: calc(var(--edge-sensitivity) + 20);
+  --border-radius: 12px;
+  --glow-padding: 40px;
+  --cone-spread: 25;
+  --card-bg: #ffffff;
+  --glow-color: hsl(255 100% 80%);
+  --glow-color-30: hsla(255 100% 80% / 0.3);
+  --glow-color-10: hsla(255 100% 80% / 0.1);
+  --gradient-base: #633bf3;
+  --gradient-one: #cbdbf5;
+  --gradient-two: #9747ff;
+  --gradient-three: #633bf3;
+  --gradient-four: #cbdbf5;
+  --gradient-five: #9747ff;
+  --gradient-six: #633bf3;
+  --gradient-seven: #cbdbf5;
+  position: relative;
+  border-radius: var(--border-radius);
+  isolation: isolate;
+  transform: translate3d(0, 0, 0.01px);
+  display: grid;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: var(--card-bg, #ffffff);
+  overflow: visible;
+}
+
+.border-glow-card::before,
+.border-glow-card::after,
+.border-glow-card > .edge-light {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transition: opacity 0.25s ease-out;
+  z-index: -1;
+}
+
+.border-glow-card:not(:hover)::before,
+.border-glow-card:not(:hover)::after,
+.border-glow-card:not(:hover) > .edge-light {
+  opacity: 0;
+  transition: opacity 0.75s ease-in-out;
+}
+
+.border-glow-card::before {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--card-bg, #ffffff) 0 100%) padding-box,
+    linear-gradient(rgb(255 255 255 / 0%) 0% 100%) border-box,
+    var(--gradient-one) border-box,
+    var(--gradient-two) border-box,
+    var(--gradient-three) border-box,
+    var(--gradient-four) border-box,
+    var(--gradient-five) border-box,
+    var(--gradient-six) border-box,
+    var(--gradient-seven) border-box,
+    var(--gradient-base) border-box;
+  opacity: calc((var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
+  mask-image: conic-gradient(
+    from var(--cursor-angle) at center,
+    black calc(var(--cone-spread) * 1%),
+    transparent calc((var(--cone-spread) + 15) * 1%),
+    transparent calc((100 - var(--cone-spread) - 15) * 1%),
+    black calc((100 - var(--cone-spread)) * 1%)
+  );
+}
+
+.border-glow-card > .edge-light {
+  inset: calc(var(--glow-padding) * -1);
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: plus-lighter;
+  mask-image: conic-gradient(
+    from var(--cursor-angle) at center,
+    black 2.5%,
+    transparent 10%,
+    transparent 90%,
+    black 97.5%
+  );
+  opacity: calc((var(--edge-proximity) - var(--edge-sensitivity)) / (100 - var(--edge-sensitivity)));
+}
+
+.border-glow-card > .edge-light::before {
+  content: "";
+  position: absolute;
+  inset: var(--glow-padding);
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px var(--glow-color),
+    0 0 15px 0 var(--glow-color-30),
+    0 0 50px 2px var(--glow-color-10);
+}
+
+.border-glow-inner {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: visible;
+  z-index: 1;
+  height: 100%;
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
