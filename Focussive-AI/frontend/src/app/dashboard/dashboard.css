@@ -1,83 +1,106 @@
 /* ============================================================
-   Zen Dashboard — Scoped Styles
-   Faithful reproduction of the reference design.
-   Only imported by dashboard/page.tsx.
+   FoccusiveAI Dashboard — Zen theme, time-aware.
+   Scoped to .zen-dashboard; imported only by dashboard/page.tsx.
+   The background scenes live in components/time-background.css.
+   Theming is token-driven: html[data-time-theme='night'] flips
+   the surface system to dark glass for readability at night.
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap');
 
-/* Override body bg when dashboard is mounted */
+/* Immersive background mode marker — lets the time-of-day scene
+   show through instead of the flat app background. */
 body.zen-bg-override,
 body.zen-bg-override.bg-background {
   background-color: transparent !important;
   background: transparent !important;
 }
 
-/* ── Zen Variables ── */
+/* ─────────────── Design tokens (day) ─────────────── */
 .zen-dashboard {
-  --glass: rgba(255,255,255,.20);
-  --glass-2: rgba(255,255,255,.30);
-  --glass-dark: rgba(28,36,32,.42);
-  --border: rgba(255,255,255,.45);
-  --border-dark: rgba(255,255,255,.16);
-  --text-0: #243029;
-  --text-1: #44544a;
-  --text-2: #66766c;
-  --text-on-dark: #f2f4ef;
-  --sage: #5c8a72;
-  --gold: #d69a4c;
-  --rose: #c97b6f;
-  --plum: #8577a8;
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-2: rgba(255, 255, 255, 0.7);
+  --glass-dark: rgba(26, 34, 29, 0.8);
+  --border: rgba(255, 255, 255, 0.75);
+  --border-dark: rgba(255, 255, 255, 0.14);
+  --chip: rgba(255, 255, 255, 0.55);
+  --chip-hover: rgba(255, 255, 255, 0.85);
+  --track: rgba(31, 45, 38, 0.14);
+  --divider: rgba(31, 45, 38, 0.14);
+  --inset-hi: rgba(255, 255, 255, 0.6);
+  --text-0: #1b2620;
+  --text-1: #3c4b42;
+  --text-2: #55655b;
+  --on-accent: #ffffff;
+  --sage: #4f7f66;
+  --sage-deep: #38604b;
+  --gold: #b97f35;
+  --rose: #b25f52;
+  --plum: #6f5f9a;
   --radius: 22px;
+  --shadow-1: 0 12px 32px -16px rgba(30, 45, 35, 0.28);
+  --shadow-2: 0 24px 60px -28px rgba(30, 45, 35, 0.38);
 
   position: relative;
   z-index: 1;
   color: var(--text-0);
+  transition: color 1s ease;
 }
 
-/* ── Display Font ── */
+/* ── Night: flip surfaces to dark glass, lift accents ── */
+html[data-time-theme='night'] .zen-dashboard {
+  --glass: rgba(16, 23, 31, 0.66);
+  --glass-2: rgba(255, 255, 255, 0.08);
+  --glass-dark: rgba(10, 15, 21, 0.78);
+  --border: rgba(255, 255, 255, 0.14);
+  --border-dark: rgba(255, 255, 255, 0.12);
+  --chip: rgba(255, 255, 255, 0.08);
+  --chip-hover: rgba(255, 255, 255, 0.16);
+  --track: rgba(255, 255, 255, 0.14);
+  --divider: rgba(255, 255, 255, 0.12);
+  --inset-hi: rgba(255, 255, 255, 0.06);
+  --text-0: #edf2ee;
+  --text-1: #c2cec6;
+  --text-2: #97a69d;
+  --on-accent: #0e1f18;
+  --sage: #8fc4a0;
+  --sage-deep: #a9d6ba;
+  --gold: #e0b26a;
+  --rose: #dd9488;
+  --plum: #b0a3d6;
+  --shadow-1: 0 12px 32px -14px rgba(0, 0, 0, 0.5);
+  --shadow-2: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Display font ── */
 .zen-dashboard .display {
   font-family: 'Fraunces', serif;
 }
 
-/* ================= ZEN NATURE BACKGROUND ================= */
-.zen-dashboard .scene {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  overflow: hidden;
-}
-.zen-dashboard .scene svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.zen-dashboard .mist {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-.zen-dashboard .mist span {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,0) 70%);
-  filter: blur(6px);
-  animation: zen-drift 38s ease-in-out infinite;
-}
-.zen-dashboard .mist span:nth-child(1) { width: 520px; height: 180px; top: 58%; left: -10%; animation-delay: 0s; }
-.zen-dashboard .mist span:nth-child(2) { width: 420px; height: 150px; top: 68%; left: 40%; animation-delay: -12s; }
-.zen-dashboard .mist span:nth-child(3) { width: 600px; height: 200px; top: 50%; left: 60%; animation-delay: -24s; }
-
-@keyframes zen-drift {
-  0%   { transform: translateX(0) translateY(0); opacity: .55; }
-  50%  { transform: translateX(60px) translateY(-10px); opacity: .85; }
-  100% { transform: translateX(0) translateY(0); opacity: .55; }
+/* Smooth theme transitions on themable surfaces */
+.zen-dashboard .glass,
+.zen-dashboard .icon-btn,
+.zen-dashboard .task-item,
+.zen-dashboard .qa,
+.zen-dashboard .pill-tag,
+.zen-dashboard .panel-tag,
+.zen-dashboard .qicon,
+.zen-dashboard .jdot,
+.zen-dashboard .task-tag {
+  transition:
+    background-color 1s ease,
+    border-color 1s ease,
+    color 1s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .zen-dashboard .mist span { animation: none; }
+/* ── Accessible focus states ── */
+.zen-dashboard button:focus-visible,
+.zen-dashboard a:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 2px;
+  border-radius: 10px;
 }
 
 /* ================= TOPBAR ================= */
@@ -97,12 +120,16 @@ body.zen-bg-override.bg-background {
   gap: 12px;
   flex-wrap: wrap;
 }
-.zen-dashboard .greet h1 {
+.zen-dashboard .greet .blur-text {
+  font-family: 'Fraunces', serif;
   font-size: 32px;
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--text-0);
-  text-shadow: 0 1px 12px rgba(255,255,255,.4);
+  text-shadow: 0 1px 14px rgba(255, 255, 255, 0.35);
+}
+html[data-time-theme='night'] .zen-dashboard .greet .blur-text {
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.45);
 }
 .zen-dashboard .live-pill {
   display: inline-flex;
@@ -112,10 +139,9 @@ body.zen-bg-override.bg-background {
   border: 1px solid var(--border);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  color: var(--sage);
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .06em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   padding: 5px 11px 5px 9px;
   border-radius: 999px;
 }
@@ -129,12 +155,13 @@ body.zen-bg-override.bg-background {
 }
 @keyframes zen-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: .3; }
+  50% { opacity: 0.3; }
 }
 .zen-dashboard .subline {
   margin-top: 6px;
   color: var(--text-1);
   font-size: 13.5px;
+  font-weight: 500;
   display: flex;
   gap: 8px;
   align-items: center;
@@ -145,27 +172,28 @@ body.zen-bg-override.bg-background {
   align-items: center;
   gap: 10px;
 }
+
+/* Primary action — solid for clear affordance in every theme */
 .zen-dashboard .btn-zen-primary {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--glass-2);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  color: var(--text-0);
+  background: linear-gradient(135deg, #5c8a72 0%, #3f6350 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
   font-weight: 600;
   font-size: 14px;
   padding: 12px 22px;
   border-radius: 14px;
   cursor: pointer;
-  box-shadow: 0 10px 30px -14px rgba(60,80,60,.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 12px 28px -12px rgba(50, 82, 64, 0.55);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
   font-family: inherit;
 }
 .zen-dashboard .btn-zen-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 36px -14px rgba(60,80,60,.45);
+  filter: brightness(1.06);
+  box-shadow: 0 16px 34px -12px rgba(50, 82, 64, 0.65);
 }
 .zen-dashboard .btn-zen-primary:active {
   transform: translateY(0);
@@ -175,7 +203,7 @@ body.zen-bg-override.bg-background {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: var(--glass);
+  background: var(--glass-2);
   border: 1px solid var(--border);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -184,11 +212,10 @@ body.zen-bg-override.bg-background {
   justify-content: center;
   color: var(--text-1);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
   font-family: inherit;
 }
 .zen-dashboard .icon-btn:hover {
-  background: var(--glass-2);
+  background: var(--chip-hover);
   color: var(--text-0);
 }
 
@@ -196,18 +223,30 @@ body.zen-bg-override.bg-background {
 .zen-dashboard .glass {
   background: var(--glass);
   border: 1px solid var(--border);
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
   border-radius: var(--radius);
-  box-shadow: 0 18px 50px -22px rgba(40,60,45,.28), inset 0 1px 0 rgba(255,255,255,.5);
+  box-shadow: var(--shadow-1), inset 0 1px 0 var(--inset-hi);
   position: relative;
 }
+
+/* Dark glass card — owns its local tokens so nested elements adapt */
 .zen-dashboard .glass-dark {
+  --track: rgba(255, 255, 255, 0.16);
+  --chip: rgba(255, 255, 255, 0.12);
+  --chip-hover: rgba(255, 255, 255, 0.2);
+  --divider: rgba(255, 255, 255, 0.12);
+  --text-0: #f2f4ef;
+  --text-1: #ccd6cf;
+  --text-2: #a9b6ae;
+  --sage: #8fc4a0;
+  --sage-deep: #a9d6ba;
+  --inset-hi: rgba(255, 255, 255, 0.08);
   background: var(--glass-dark);
   border: 1px solid var(--border-dark);
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
-  color: var(--text-on-dark);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  color: var(--text-0);
 }
 
 /* ================= STAT CARDS ================= */
@@ -228,6 +267,10 @@ body.zen-bg-override.bg-background {
 .zen-dashboard .stat-card {
   padding: 22px;
 }
+.zen-dashboard .glass.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2), inset 0 1px 0 var(--inset-hi);
+}
 .zen-dashboard .stat-top {
   display: flex;
   align-items: center;
@@ -236,54 +279,47 @@ body.zen-bg-override.bg-background {
 }
 .zen-dashboard .stat-label {
   font-size: 11px;
-  letter-spacing: .08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-2);
-  font-weight: 600;
-}
-.zen-dashboard .glass-dark .stat-label {
-  color: #c7d0c9;
+  font-weight: 700;
 }
 .zen-dashboard .pill-tag {
   font-size: 10.5px;
-  background: var(--glass-2);
+  font-weight: 600;
+  background: var(--chip);
   border: 1px solid var(--border);
   padding: 3px 9px;
   border-radius: 999px;
   color: var(--text-1);
 }
 .zen-dashboard .glass-dark .pill-tag {
-  background: rgba(255,255,255,.12);
   border-color: var(--border-dark);
-  color: #a9b6ae;
 }
 .zen-dashboard .stat-big {
   font-family: 'Fraunces', serif;
+  font-variant-numeric: tabular-nums;
   font-size: 36px;
   font-weight: 500;
   display: flex;
   align-items: baseline;
   gap: 6px;
+  color: var(--text-0);
 }
 .zen-dashboard .stat-big small {
   font-size: 14px;
-  color: var(--sage);
-  font-weight: 600;
-  font-family: 'Inter', 'Manrope', sans-serif;
-}
-.zen-dashboard .glass-dark .stat-big small {
-  color: #8fc4a0;
+  color: var(--sage-deep);
+  font-weight: 700;
+  font-family: 'Manrope', 'Inter', sans-serif;
 }
 .zen-dashboard .stat-sub {
   margin-top: 8px;
   font-size: 12.5px;
+  font-weight: 500;
   color: var(--text-2);
 }
-.zen-dashboard .glass-dark .stat-sub {
-  color: #a9b6ae;
-}
 
-/* Mini Bars */
+/* Mini bars */
 .zen-dashboard .bars {
   display: flex;
   align-items: flex-end;
@@ -294,32 +330,33 @@ body.zen-bg-override.bg-background {
 .zen-dashboard .bars i {
   flex: 1;
   border-radius: 5px 5px 2px 2px;
-  background: rgba(255,255,255,.18);
-  transition: height 0.6s cubic-bezier(0.22,1,0.36,1);
+  background: var(--track);
+  transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1), background-color 1s ease;
 }
 .zen-dashboard .bars i.on {
-  background: linear-gradient(180deg, var(--sage), #3f6350);
+  background: linear-gradient(180deg, #8fc4a0, #5c8a72);
 }
 
-/* Bar Track */
+/* Progress track */
 .zen-dashboard .bar-track {
   height: 8px;
   border-radius: 99px;
-  background: rgba(255,255,255,.25);
+  background: var(--track);
   overflow: hidden;
   margin-top: 14px;
 }
 .zen-dashboard .bar-fill {
   height: 100%;
   border-radius: 99px;
-  background: linear-gradient(90deg, var(--sage), var(--gold));
-  transition: width 1s cubic-bezier(0.22,1,0.36,1);
+  background: linear-gradient(90deg, #5c8a72, #d69a4c);
+  transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .zen-dashboard .legend-row {
   display: flex;
   gap: 14px;
   margin-top: 10px;
   font-size: 11.5px;
+  font-weight: 500;
   color: var(--text-2);
 }
 .zen-dashboard .legend-row span {
@@ -334,7 +371,7 @@ body.zen-bg-override.bg-background {
   display: inline-block;
 }
 
-/* Ring Mini */
+/* Burnout ring */
 .zen-dashboard .ring-mini {
   width: 74px;
   height: 74px;
@@ -344,6 +381,9 @@ body.zen-bg-override.bg-background {
 .zen-dashboard .ring-mini svg {
   transform: rotate(-90deg);
 }
+.zen-dashboard .ring-track {
+  stroke: var(--track);
+}
 .zen-dashboard .ring-mini .val {
   position: absolute;
   inset: 0;
@@ -352,29 +392,22 @@ body.zen-bg-override.bg-background {
   justify-content: center;
   font-family: 'Fraunces', serif;
   font-size: 20px;
+  color: var(--text-0);
 }
-.zen-dashboard .ok-line {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--sage);
-  margin-top: 12px;
-  justify-content: center;
-  font-weight: 600;
-}
+.zen-dashboard .ok-line,
 .zen-dashboard .warn-line {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: var(--rose);
   margin-top: 12px;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 700;
 }
+.zen-dashboard .ok-line { color: var(--sage-deep); }
+.zen-dashboard .warn-line { color: var(--rose); }
 
-/* Streak Dots */
+/* Streak dots */
 .zen-dashboard .streak-dots {
   display: flex;
   gap: 6px;
@@ -384,13 +417,13 @@ body.zen-bg-override.bg-background {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: rgba(255,255,255,.25);
+  background: var(--track);
   display: inline-block;
   transition: all 0.3s ease;
 }
 .zen-dashboard .streak-dots i.on {
   background: var(--gold);
-  box-shadow: 0 0 8px rgba(214,154,76,.7);
+  box-shadow: 0 0 8px rgba(214, 154, 76, 0.7);
 }
 
 /* ================= MID GRID ================= */
@@ -420,22 +453,26 @@ body.zen-bg-override.bg-background {
   font-size: 19px;
   font-weight: 500;
   color: var(--text-0);
+  margin: 0;
 }
 .zen-dashboard .panel-head a {
-  color: var(--sage);
+  color: var(--sage-deep);
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
-  transition: color 0.2s ease;
+  padding: 4px 10px;
+  border-radius: 999px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 .zen-dashboard .panel-head a:hover {
-  color: #3f6350;
+  background: var(--chip);
 }
 .zen-dashboard .panel-tag {
   display: inline-block;
-  background: var(--glass-2);
+  background: var(--chip);
   border: 1px solid var(--border);
   font-size: 11px;
+  font-weight: 600;
   padding: 3px 10px;
   border-radius: 999px;
   color: var(--text-1);
@@ -443,20 +480,21 @@ body.zen-bg-override.bg-background {
 }
 .zen-dashboard .panel-big {
   font-family: 'Fraunces', serif;
+  font-variant-numeric: tabular-nums;
   font-size: 34px;
   font-weight: 500;
   margin-bottom: 14px;
   color: var(--text-0);
 }
 
-/* Quick Actions Grid */
+/* Quick Actions */
 .zen-dashboard .qa-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
 .zen-dashboard .qa {
-  background: var(--glass-2);
+  background: var(--chip);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 16px;
@@ -464,13 +502,13 @@ body.zen-bg-override.bg-background {
   flex-direction: column;
   gap: 10px;
   cursor: pointer;
-  transition: transform 0.18s ease, background 0.2s ease;
   text-decoration: none;
   color: var(--text-0);
 }
 .zen-dashboard .qa:hover {
   transform: translateY(-3px);
-  background: rgba(255,255,255,.45);
+  background: var(--chip-hover);
+  box-shadow: var(--shadow-1);
 }
 .zen-dashboard .qicon {
   width: 34px;
@@ -479,14 +517,25 @@ body.zen-bg-override.bg-background {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,.4);
+  background: var(--chip);
 }
-.zen-dashboard .qa span {
+.zen-dashboard .qicon .material-symbols-outlined {
+  font-size: 17px;
+}
+.zen-dashboard .qicon.tint-sage { background: rgba(92, 138, 114, 0.16); }
+.zen-dashboard .qicon.tint-sage .material-symbols-outlined { color: var(--sage-deep); }
+.zen-dashboard .qicon.tint-rose { background: rgba(178, 95, 82, 0.14); }
+.zen-dashboard .qicon.tint-rose .material-symbols-outlined { color: var(--rose); }
+.zen-dashboard .qicon.tint-gold { background: rgba(185, 127, 53, 0.14); }
+.zen-dashboard .qicon.tint-gold .material-symbols-outlined { color: var(--gold); }
+.zen-dashboard .qicon.tint-plum { background: rgba(111, 95, 154, 0.14); }
+.zen-dashboard .qicon.tint-plum .material-symbols-outlined { color: var(--plum); }
+.zen-dashboard .qa > span {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-/* Journey / Wisdom List */
+/* Journey / Wisdom list */
 .zen-dashboard .journey-list {
   display: flex;
   flex-direction: column;
@@ -497,17 +546,23 @@ body.zen-bg-override.bg-background {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px 0;
+  padding: 12px 8px;
+  margin: 0 -8px;
+  border-radius: 12px;
   position: relative;
+  transition: background-color 0.2s ease;
+}
+.zen-dashboard .jrow:hover {
+  background: var(--chip);
 }
 .zen-dashboard .jrow:not(:last-child)::after {
   content: '';
   position: absolute;
-  left: 15px;
-  top: 38px;
-  bottom: -12px;
+  left: 23px;
+  top: 40px;
+  bottom: -10px;
   width: 2px;
-  background: rgba(90,110,95,.2);
+  background: var(--divider);
 }
 .zen-dashboard .jdot {
   width: 32px;
@@ -517,21 +572,21 @@ body.zen-bg-override.bg-background {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: var(--glass-2);
+  background: var(--chip);
   border: 1px solid var(--border);
   color: var(--text-1);
   font-size: 16px;
 }
 .zen-dashboard .jrow.done .jdot {
   background: var(--sage);
-  color: #fff;
+  color: var(--on-accent);
   border-color: var(--sage);
 }
 .zen-dashboard .jrow.current .jdot {
   background: var(--plum);
-  color: #fff;
+  color: var(--on-accent);
   border-color: var(--plum);
-  box-shadow: 0 0 0 5px rgba(133,119,168,.18);
+  box-shadow: 0 0 0 5px rgba(133, 119, 168, 0.18);
 }
 .zen-dashboard .jtitle {
   font-weight: 600;
@@ -541,6 +596,7 @@ body.zen-bg-override.bg-background {
 }
 .zen-dashboard .jtime {
   font-size: 12.5px;
+  font-weight: 600;
   color: var(--text-2);
 }
 
@@ -556,16 +612,15 @@ body.zen-bg-override.bg-background {
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
-  background: var(--glass-2);
+  background: var(--chip);
   border: 1px solid var(--border);
   border-radius: 14px;
   margin-top: 12px;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
 }
 .zen-dashboard .task-item:hover {
   transform: translateX(4px);
-  background: rgba(255,255,255,.42);
+  background: var(--chip-hover);
 }
 .zen-dashboard .task-check {
   width: 22px;
@@ -575,7 +630,7 @@ body.zen-bg-override.bg-background {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--on-accent);
   flex-shrink: 0;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
@@ -584,7 +639,7 @@ body.zen-bg-override.bg-background {
   font-family: inherit;
 }
 .zen-dashboard .task-check:hover {
-  background: rgba(92,138,114,.15);
+  background: rgba(92, 138, 114, 0.18);
   transform: scale(1.1);
 }
 .zen-dashboard .task-check.on {
@@ -604,80 +659,28 @@ body.zen-bg-override.bg-background {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.zen-dashboard .task-name.is-done {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
 .zen-dashboard .task-tag {
   font-size: 11px;
   padding: 3px 10px;
   border-radius: 999px;
-  background: rgba(255,255,255,.35);
-  color: var(--text-2);
-  font-weight: 500;
+  background: var(--chip);
+  color: var(--text-1);
+  font-weight: 600;
   text-transform: capitalize;
   flex-shrink: 0;
 }
-.zen-dashboard .task-tag.urgent {
-  background: rgba(201,123,111,.15);
-  color: var(--rose);
-}
-.zen-dashboard .task-tag.high {
-  background: rgba(201,123,111,.12);
-  color: #b8695e;
-}
-.zen-dashboard .task-tag.medium {
-  background: rgba(133,119,168,.12);
-  color: var(--plum);
-}
-.zen-dashboard .task-tag.low {
-  background: rgba(92,138,114,.12);
-  color: var(--sage);
-}
-
-/* ================= AI WISDOM PANEL ================= */
-.zen-dashboard .wisdom-item {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 10px 12px;
-  border-radius: 12px;
-  text-decoration: none;
-  color: var(--text-0);
-  transition: background 0.2s ease;
-  cursor: pointer;
-}
-.zen-dashboard .wisdom-item:hover {
-  background: rgba(255,255,255,.25);
-}
-.zen-dashboard .wisdom-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(133,119,168,.12);
-  flex-shrink: 0;
-  color: var(--plum);
-  font-size: 16px;
-}
-.zen-dashboard .wisdom-title {
-  font-weight: 600;
-  font-size: 13.5px;
-  color: var(--text-0);
-}
-.zen-dashboard .wisdom-desc {
-  font-size: 12.5px;
-  color: var(--text-2);
-  margin-top: 2px;
-  line-height: 1.4;
-}
-.zen-dashboard .wisdom-cta {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--plum);
-  margin-top: 4px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
+.zen-dashboard .task-tag.urgent { background: rgba(178, 95, 82, 0.16); color: #96473b; }
+.zen-dashboard .task-tag.high { background: rgba(178, 95, 82, 0.12); color: #a25446; }
+.zen-dashboard .task-tag.medium { background: rgba(111, 95, 154, 0.14); color: #5d4f87; }
+.zen-dashboard .task-tag.low { background: rgba(79, 127, 102, 0.14); color: #3f6a53; }
+html[data-time-theme='night'] .zen-dashboard .task-tag.urgent { background: rgba(221, 148, 136, 0.18); color: #eba99c; }
+html[data-time-theme='night'] .zen-dashboard .task-tag.high { background: rgba(221, 148, 136, 0.14); color: #e39c8f; }
+html[data-time-theme='night'] .zen-dashboard .task-tag.medium { background: rgba(176, 163, 214, 0.16); color: #c3b6e6; }
+html[data-time-theme='night'] .zen-dashboard .task-tag.low { background: rgba(143, 196, 160, 0.16); color: #a5d6b8; }
 
 /* ================= TOAST ================= */
 .zen-dashboard .zen-toast {
@@ -688,17 +691,21 @@ body.zen-bg-override.bg-background {
   z-index: 100;
   padding: 12px 24px;
   border-radius: 16px;
-  background: rgba(255,255,255,.75);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  box-shadow: 0 12px 40px rgba(40,60,45,.15);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 40px rgba(40, 60, 45, 0.18);
   font-weight: 600;
   font-size: 14px;
-  color: var(--sage);
-  animation: zen-slideDown 0.4s cubic-bezier(0.22,1,0.36,1);
+  color: #38604b;
+  animation: zen-slideDown 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
-
+html[data-time-theme='night'] .zen-dashboard .zen-toast {
+  background: rgba(20, 28, 38, 0.9);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #a9d6ba;
+}
 @keyframes zen-slideDown {
   from { opacity: 0; transform: translateX(-50%) translateY(-16px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -707,15 +714,18 @@ body.zen-bg-override.bg-background {
 /* ================= RECHARTS OVERRIDES ================= */
 .zen-dashboard .recharts-cartesian-grid-horizontal line,
 .zen-dashboard .recharts-cartesian-grid-vertical line {
-  stroke: rgba(60,80,60,.08);
+  stroke: var(--divider);
 }
 .zen-dashboard .recharts-text {
   fill: var(--text-2) !important;
   font-size: 12px !important;
-  font-family: 'Inter', 'Manrope', sans-serif !important;
+  font-family: 'Manrope', 'Inter', sans-serif !important;
 }
 .zen-dashboard .recharts-tooltip-wrapper {
-  filter: drop-shadow(0 4px 12px rgba(40,60,45,.1));
+  filter: drop-shadow(0 4px 12px rgba(40, 60, 45, 0.1));
+}
+html[data-time-theme='night'] .zen-dashboard .recharts-area-curve {
+  stroke: #9ecfae !important;
 }
 
 /* ================= EMPTY STATE ================= */
@@ -728,14 +738,15 @@ body.zen-bg-override.bg-background {
 }
 .zen-dashboard .empty-zen .material-symbols-outlined {
   font-size: 36px;
-  color: rgba(92,138,114,.3);
+  color: var(--sage);
+  opacity: 0.5;
   display: block;
   margin-bottom: 8px;
 }
 
 /* ================= ANIMATIONS ================= */
 .zen-dashboard .zen-fade-in {
-  animation: zen-fadeIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  animation: zen-fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes zen-fadeIn {
   from { opacity: 0; transform: translateY(16px); }
@@ -744,10 +755,27 @@ body.zen-bg-override.bg-background {
 
 /* Stagger */
 .zen-dashboard .zd-1 { animation-delay: 0.05s; }
-.zen-dashboard .zd-2 { animation-delay: 0.10s; }
+.zen-dashboard .zd-2 { animation-delay: 0.1s; }
 .zen-dashboard .zd-3 { animation-delay: 0.15s; }
-.zen-dashboard .zd-4 { animation-delay: 0.20s; }
+.zen-dashboard .zd-4 { animation-delay: 0.2s; }
 .zen-dashboard .zd-5 { animation-delay: 0.25s; }
-.zen-dashboard .zd-6 { animation-delay: 0.30s; }
+.zen-dashboard .zd-6 { animation-delay: 0.3s; }
 .zen-dashboard .zd-7 { animation-delay: 0.35s; }
-.zen-dashboard .zd-8 { animation-delay: 0.40s; }
+.zen-dashboard .zd-8 { animation-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .zen-dashboard .zen-fade-in { animation: none; }
+  .zen-dashboard .live-dot { animation: none; }
+}
+
+/* ================= RESPONSIVE POLISH ================= */
+@media (max-width: 640px) {
+  .zen-dashboard .greet .blur-text { font-size: 26px; }
+  .zen-dashboard .panel,
+  .zen-dashboard .tasks-panel { padding: 20px; }
+  .zen-dashboard .stat-big,
+  .zen-dashboard .panel-big { font-size: 30px; }
+  .zen-dashboard .topbar { flex-direction: column; align-items: stretch; }
+  .zen-dashboard .top-actions { width: 100%; }
+  .zen-dashboard .btn-zen-primary { flex: 1; justify-content: center; }
+}
