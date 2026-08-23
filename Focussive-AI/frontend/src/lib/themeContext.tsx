@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { getTimePeriod, TimePeriod } from '@/components/TimeBackground';
+import { getTimePeriod, TimePeriod } from '@/lib/timePeriod';
 
 /* ============================================================
    ThemeContext — shared state for the time-of-day background.

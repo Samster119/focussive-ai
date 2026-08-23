@@ -1,25 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { TimePeriod } from '@/lib/timePeriod';
+import { useTheme } from '@/lib/themeContext';
 import './time-background.css';
 
 /* ============================================================
    TimeBackground — global time-of-day background system.
    Renders 4 zen nature scenes (morning / afternoon / evening /
-   night) and cross-fades between them based on the user's local
-   time. Sets `data-time-theme` on <html> so page-level CSS can
-   adapt (e.g. the dashboard flips to dark glass at night).
+   night) and cross-fades between them based on the resolved
+   period from ThemeContext (which handles both auto clock-based
+   and user-overridden scenes).
+   Sets `data-time-theme` on <html> so page-level CSS can adapt.
    ============================================================ */
 
-export type TimePeriod = 'morning' | 'afternoon' | 'evening' | 'night';
-
-export function getTimePeriod(date: Date = new Date()): TimePeriod {
-  const h = date.getHours();
-  if (h >= 5 && h < 12) return 'morning';
-  if (h >= 12 && h < 17) return 'afternoon';
-  if (h >= 17 && h < 21) return 'evening';
-  return 'night';
-}
+export type { TimePeriod } from '@/lib/timePeriod';
+export { getTimePeriod } from '@/lib/timePeriod';
 
 interface ScenePalette {
   sky: [string, string, string];
@@ -230,13 +226,7 @@ function TimeBackgroundInner({ resolved }: { resolved: TimePeriod }) {
   );
 }
 
-/* Thin wrapper that reads from ThemeContext. ThemeProvider is always
-   an ancestor (mounted in AppLayout), so the context is always present. */
 export default function TimeBackground() {
-  // Dynamic import to avoid a circular-dependency at module parse time
-  // (TimeBackground is imported by AppLayout; themeContext imports from
-  // TimeBackground for the TimePeriod type only, which is fine at runtime).
-  const { useTheme } = require('@/lib/themeContext') as typeof import('@/lib/themeContext');
   const { resolved } = useTheme();
   return <TimeBackgroundInner resolved={resolved} />;
 }
