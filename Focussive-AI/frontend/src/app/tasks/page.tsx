@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
 import { useApi } from '@/lib/query';
 import { apiFetch } from '@/lib/api';
-import ZenBackground from '@/app/dashboard/ZenBackground';
 import './tasks.css';
 
 /* ─── Types ─── */
@@ -239,8 +238,6 @@ export default function TasksPage() {
   return (
     <AppLayout>
       <div className="zen-tasks">
-        <ZenBackground />
-
         {/* Toast */}
         {toast && <div className="toast">{toast}</div>}
 
