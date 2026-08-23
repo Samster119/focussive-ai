@@ -5,7 +5,6 @@ import AppLayout from '@/components/AppLayout';
 import { useAuthStore } from '@/lib/auth.store';
 import { useApi } from '@/lib/query';
 import { parseFile } from '@/lib/fileParser';
-import ZenBackground from './dashboard/ZenBackground';
 import './assistant.css';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
@@ -297,9 +296,6 @@ export default function AssistantPage() {
   return (
     <AppLayout>
       <div className="zen-assistant">
-        {/* Zen nature background */}
-        <ZenBackground />
-
         {/* ── HEADER ── */}
         <div className="asst-header">
           <div className="asst-brand">

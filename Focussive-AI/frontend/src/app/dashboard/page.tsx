@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import AppLayout from '@/components/AppLayout';
 import { useAuthStore } from '@/lib/auth.store';
@@ -16,10 +16,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import ZenBackground from './ZenBackground';
 import AnimatedCounter from './AnimatedCounter';
 import BlurText from './BlurText';
 import GradientText from './GradientText';
+import { useTheme, ThemeOverride } from '@/lib/themeContext';
 import './dashboard.css';
 
 /* ───────── Types ───────── */
@@ -49,9 +49,10 @@ interface Recommendation {
 /* ───────── Helpers ───────── */
 function greet(name: string) {
   const h = new Date().getHours();
-  if (h < 12) return `Good morning, ${name}`;
-  if (h < 17) return `Good afternoon, ${name}`;
-  return `Good evening, ${name}`;
+  if (h >= 5 && h < 12) return `Good morning, ${name}`;
+  if (h >= 12 && h < 17) return `Good afternoon, ${name}`;
+  if (h >= 17 && h < 21) return `Good evening, ${name}`;
+  return `Good night, ${name}`;
 }
 
 function priorityTagClass(p: string) {
@@ -89,32 +90,109 @@ function buildFocusChartData(sessions: FocusSession[]) {
   }));
 }
 
+/* ───────── Scene Selector ───────── */
+const SCENE_OPTIONS: { value: ThemeOverride; label: string; icon: string }[] = [
+  { value: 'auto',      label: 'Auto',      icon: 'schedule' },
+  { value: 'morning',   label: 'Morning',   icon: 'wb_twilight' },
+  { value: 'afternoon', label: 'Afternoon', icon: 'wb_sunny' },
+  { value: 'evening',   label: 'Evening',   icon: 'wb_cloudy' },
+  { value: 'night',     label: 'Night',     icon: 'bedtime' },
+];
+
+function SceneSelector() {
+  const { override, setOverride } = useTheme();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  /* Close on outside click */
+  useEffect(() => {
+    if (!open) return;
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  /* Close on Escape */
+  useEffect(() => {
+    if (!open) return;
+    function handler(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
+
+  const current = SCENE_OPTIONS.find((o) => o.value === override) ?? SCENE_OPTIONS[0];
+
+  return (
+    <div className="scene-selector" ref={ref}>
+      <button
+        className="scene-pill"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title="Change background scene"
+      >
+        <span className="material-symbols-outlined scene-pill-icon" style={{ fontSize: 16 }}>
+          {current.icon}
+        </span>
+        <span className="scene-pill-label">{current.label}</span>
+        <span className="material-symbols-outlined scene-pill-chevron" style={{ fontSize: 14 }}>
+          {open ? 'expand_less' : 'expand_more'}
+        </span>
+      </button>
+
+      {open && (
+        <div className="scene-popover" role="listbox" aria-label="Background scene">
+          {SCENE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              role="option"
+              aria-selected={override === opt.value}
+              className={`scene-option${override === opt.value ? ' active' : ''}`}
+              onClick={() => { setOverride(opt.value); setOpen(false); }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>{opt.icon}</span>
+              <span>{opt.label}</span>
+              {override === opt.value && (
+                <span className="material-symbols-outlined scene-check" style={{ fontSize: 14 }}>check</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ───────── Custom Tooltip ───────── */
 function ZenTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div
       style={{
-        background: 'rgba(255,255,255,.75)',
+        background: 'rgba(255,255,255,.88)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,.45)',
+        border: '1px solid rgba(255,255,255,.6)',
         borderRadius: 12,
         padding: '8px 14px',
-        boxShadow: '0 8px 28px rgba(40,60,45,.12)',
+        boxShadow: '0 8px 28px rgba(40,60,45,.18)',
       }}
     >
       <p style={{ margin: 0, fontWeight: 600, fontSize: 12, color: '#243029' }}>{label}</p>
-      <p style={{ margin: '3px 0 0', fontSize: 12, color: '#5c8a72' }}>
+      <p style={{ margin: '3px 0 0', fontSize: 12, color: '#4f7f66' }}>
         {payload[0].value}h focus
       </p>
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════
-   DASHBOARD PAGE — Zen Nature Theme
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   DASHBOARD PAGE — Zen theme, time-aware
+   ═══════════════════════════════════════ */
 export default function DashboardPage() {
   const { user, logout } = useAuthStore();
   const router = useRouter();
@@ -122,10 +200,17 @@ export default function DashboardPage() {
   const [completingIds, setCompletingIds] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<string | null>(null);
 
-  /* ── Override body background for zen scene ── */
+  /* ── Immersive background mode: reveal the time-of-day scene ── */
   useEffect(() => {
     document.body.classList.add('zen-bg-override');
     return () => { document.body.classList.remove('zen-bg-override'); };
+  }, []);
+
+  /* ── Live clock (updates every 30s) ── */
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(id);
   }, []);
 
   /* ── API Data ── */
@@ -178,7 +263,6 @@ export default function DashboardPage() {
   const burnoutDash = `${(burnoutPct / 100) * 188} 188`;
 
   /* Time display */
-  const now = new Date();
   const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -223,8 +307,6 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <div className="zen-dashboard">
-        <ZenBackground />
-
         {/* Toast */}
         {toast && <div className="zen-toast">{toast}</div>}
 
@@ -237,11 +319,10 @@ export default function DashboardPage() {
                 delay={80}
                 animateBy="words"
                 direction="top"
-                className="display text-3xl font-medium tracking-tight"
-                style={{ fontSize: '32px', textShadow: '0 1px 12px rgba(255,255,255,.4)' }}
+                className="display font-medium tracking-tight"
               />
               <GradientText
-                colors={["#5c8a72", "#8fc4a0", "#3f6350"]}
+                colors={["#5c8a72", "#9ed3b1", "#4f7f66"]}
                 animationSpeed={8}
                 showBorder={false}
                 className="live-pill"
@@ -251,9 +332,9 @@ export default function DashboardPage() {
               </GradientText>
             </div>
             <div className="subline">
-              <span>{dateStr}</span>
+              <span suppressHydrationWarning>{dateStr}</span>
               <span>·</span>
-              <span>{timeStr}</span>
+              <span suppressHydrationWarning>{timeStr}</span>
             </div>
           </div>
           <div className="top-actions">
@@ -265,6 +346,7 @@ export default function DashboardPage() {
               <span className="material-symbols-outlined" style={{ fontSize: 18 }}>play_arrow</span>
               Start Session
             </button>
+            <SceneSelector />
             <button
               id="dashboard-logout"
               className="icon-btn"
@@ -273,7 +355,7 @@ export default function DashboardPage() {
             >
               <span className="material-symbols-outlined" style={{ fontSize: 18 }}>logout</span>
             </button>
-            <div className="icon-btn">
+            <div className="icon-btn" aria-hidden="true">
               <span className="material-symbols-outlined" style={{ fontSize: 18 }}>person</span>
             </div>
           </div>
@@ -335,19 +417,22 @@ export default function DashboardPage() {
             <div className="ring-mini">
               <svg viewBox="0 0 74 74" width="74" height="74">
                 <circle
+                  className="ring-track"
                   cx="37" cy="37" r="30"
                   fill="none"
-                  stroke="rgba(255,255,255,.35)"
                   strokeWidth="7"
                 />
                 <circle
                   cx="37" cy="37" r="30"
                   fill="none"
-                  stroke={burnoutOk ? 'var(--sage)' : 'var(--rose)'}
                   strokeWidth="7"
                   strokeLinecap="round"
                   strokeDasharray={burnoutDash}
-                  style={{ transform: 'rotate(-90deg)', transformOrigin: 'center' }}
+                  style={{
+                    stroke: burnoutOk ? 'var(--sage)' : 'var(--rose)',
+                    transform: 'rotate(-90deg)',
+                    transformOrigin: 'center',
+                  }}
                 />
               </svg>
               <div className="val display">{burnoutLabel}</div>
@@ -451,26 +536,26 @@ export default function DashboardPage() {
               </div>
               <div className="qa-grid">
                 <Link href="/" className="qa">
-                  <div className="qicon">
-                    <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#3f6350' }}>smart_toy</span>
+                  <div className="qicon tint-plum">
+                    <span className="material-symbols-outlined">smart_toy</span>
                   </div>
                   <span>AI Chat</span>
                 </Link>
                 <Link href="/focus" className="qa">
-                  <div className="qicon">
-                    <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#a15a4f' }}>timer</span>
+                  <div className="qicon tint-rose">
+                    <span className="material-symbols-outlined">timer</span>
                   </div>
                   <span>Focus</span>
                 </Link>
                 <Link href="/tasks" className="qa">
-                  <div className="qicon">
-                    <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#3f6350' }}>checklist</span>
+                  <div className="qicon tint-sage">
+                    <span className="material-symbols-outlined">checklist</span>
                   </div>
                   <span>Tasks</span>
                 </Link>
                 <Link href="/calendar" className="qa">
-                  <div className="qicon">
-                    <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#a1793f' }}>calendar_month</span>
+                  <div className="qicon tint-gold">
+                    <span className="material-symbols-outlined">calendar_month</span>
                   </div>
                   <span>Calendar</span>
                 </Link>
@@ -481,7 +566,7 @@ export default function DashboardPage() {
             <div className="glass panel zen-fade-in zd-7" style={{ padding: 22, flex: 1 }}>
               <div className="panel-head">
                 <GradientText
-                  colors={["#5227FF", "#FF9FFC", "#B497CF"]}
+                  colors={["#8577a8", "#c9a2d8", "#5c8a72"]}
                   animationSpeed={6}
                   showBorder={false}
                   className="!mx-0"
@@ -495,7 +580,7 @@ export default function DashboardPage() {
               {(recData?.recommendations ?? []).length > 0 ? (
                 <div className="journey-list">
                   {recData!.recommendations.slice(0, 4).map((rec, i) => {
-                    const promptText = `Can you help me implement this recommendation: "${rec.title}" — ${rec.description}? Please update my schedule or tasks as required.`;
+                    const promptText = `Can you help me implement this recommendation: \"${rec.title}\" — ${rec.description}? Please update my schedule or tasks as required.`;
                     const stateClass = i === 0 ? 'done' : i === 1 ? 'current' : '';
                     return (
                       <Link
@@ -578,11 +663,11 @@ export default function DashboardPage() {
                   onClick={() => router.push('/tasks')}
                 >
                   <div className="task-check on">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                       <path d="M20 6L9 17l-5-5" />
                     </svg>
                   </div>
-                  <div className="task-name" style={{ opacity: 0.6, textDecoration: 'line-through' }}>
+                  <div className="task-name is-done">
                     {task.title}
                   </div>
                   <span className="task-tag">Done</span>
