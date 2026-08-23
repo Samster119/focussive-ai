@@ -206,18 +206,33 @@ function Scene({ id, p }: { id: TimePeriod; p: ScenePalette }) {
 }
 
 export default function TimeBackground() {
-  const [period, setPeriod] = useState<TimePeriod | null>(null);
+  /* Use the shared ThemeContext when available; fall back to local
+     clock state so TimeBackground still works if rendered outside
+     a ThemeProvider (e.g. in tests or Storybook). */
+  let contextResolved: TimePeriod | null = null;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { resolved } = require('@/lib/themeContext').useTheme();
+    contextResolved = resolved as TimePeriod;
+  } catch {
+    /* ThemeContext not available */
+  }
 
-  /* Determine period on mount + re-check every minute so the scene
-     transitions naturally when the time period changes. */
+  const [clockPeriod, setClockPeriod] = useState<TimePeriod | null>(null);
+
+  /* Fallback clock — only used when ThemeContext is unavailable */
   useEffect(() => {
-    const update = () => setPeriod(getTimePeriod());
+    if (contextResolved !== null) return;
+    const update = () => setClockPeriod(getTimePeriod());
     update();
     const id = setInterval(update, 60_000);
     return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* Expose the theme to CSS (dashboard night mode, veil tints, etc.) */
+  const period: TimePeriod | null = contextResolved ?? clockPeriod;
+
+  /* Expose the resolved theme to CSS */
   useEffect(() => {
     if (period) document.documentElement.setAttribute('data-time-theme', period);
   }, [period]);

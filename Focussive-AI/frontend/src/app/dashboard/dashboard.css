@@ -768,6 +768,117 @@ html[data-time-theme='night'] .zen-dashboard .recharts-area-curve {
   .zen-dashboard .live-dot { animation: none; }
 }
 
+/* ================= SCENE SELECTOR ================= */
+.zen-dashboard .scene-selector {
+  position: relative;
+}
+
+/* Pill trigger */
+.zen-dashboard .scene-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: var(--glass-2);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--text-1);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.zen-dashboard .scene-pill:hover {
+  background: var(--chip-hover);
+  color: var(--text-0);
+}
+.zen-dashboard .scene-pill:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 2px;
+}
+.zen-dashboard .scene-pill-icon {
+  color: var(--sage);
+  flex-shrink: 0;
+}
+.zen-dashboard .scene-pill-chevron {
+  color: var(--text-2);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+/* Popover */
+.zen-dashboard .scene-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 168px;
+  background: var(--glass-2);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  border-radius: 16px;
+  box-shadow: var(--shadow-2);
+  padding: 6px;
+  z-index: 200;
+  animation: scene-pop 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes scene-pop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* Option rows */
+.zen-dashboard .scene-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-1);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.zen-dashboard .scene-option:hover {
+  background: var(--chip);
+  color: var(--text-0);
+}
+.zen-dashboard .scene-option.active {
+  color: var(--sage-deep);
+  font-weight: 700;
+}
+.zen-dashboard .scene-option.active .material-symbols-outlined:first-child {
+  color: var(--sage);
+}
+.zen-dashboard .scene-check {
+  margin-left: auto;
+  color: var(--sage);
+}
+.zen-dashboard .scene-option:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: -2px;
+}
+
+/* Night-mode adjustments */
+html[data-time-theme='night'] .zen-dashboard .scene-pill {
+  background: var(--glass);
+}
+html[data-time-theme='night'] .zen-dashboard .scene-popover {
+  background: rgba(14, 20, 30, 0.88);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
 /* ================= RESPONSIVE POLISH ================= */
 @media (max-width: 640px) {
   .zen-dashboard .greet .blur-text { font-size: 26px; }
@@ -778,4 +889,13 @@ html[data-time-theme='night'] .zen-dashboard .recharts-area-curve {
   .zen-dashboard .topbar { flex-direction: column; align-items: stretch; }
   .zen-dashboard .top-actions { width: 100%; }
   .zen-dashboard .btn-zen-primary { flex: 1; justify-content: center; }
+  /* Collapse label on very small screens — keep icon + chevron only */
+  .zen-dashboard .scene-pill-label { display: none; }
+  .zen-dashboard .scene-pill { padding: 0 10px; }
+  /* Popover anchors left on mobile so it doesn't clip */
+  .zen-dashboard .scene-popover { right: auto; left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zen-dashboard .scene-popover { animation: none; }
 }

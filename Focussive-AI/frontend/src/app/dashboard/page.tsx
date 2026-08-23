@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import AppLayout from '@/components/AppLayout';
 import { useAuthStore } from '@/lib/auth.store';
@@ -19,6 +19,7 @@ import {
 import AnimatedCounter from './AnimatedCounter';
 import BlurText from './BlurText';
 import GradientText from './GradientText';
+import { useTheme, ThemeOverride } from '@/lib/themeContext';
 import './dashboard.css';
 
 /* ───────── Types ───────── */
@@ -87,6 +88,83 @@ function buildFocusChartData(sessions: FocusSession[]) {
     day,
     hours: Math.round(hours * 10) / 10,
   }));
+}
+
+/* ───────── Scene Selector ───────── */
+const SCENE_OPTIONS: { value: ThemeOverride; label: string; icon: string }[] = [
+  { value: 'auto',      label: 'Auto',      icon: 'schedule' },
+  { value: 'morning',   label: 'Morning',   icon: 'wb_twilight' },
+  { value: 'afternoon', label: 'Afternoon', icon: 'wb_sunny' },
+  { value: 'evening',   label: 'Evening',   icon: 'wb_cloudy' },
+  { value: 'night',     label: 'Night',     icon: 'bedtime' },
+];
+
+function SceneSelector() {
+  const { override, setOverride } = useTheme();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  /* Close on outside click */
+  useEffect(() => {
+    if (!open) return;
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  /* Close on Escape */
+  useEffect(() => {
+    if (!open) return;
+    function handler(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
+
+  const current = SCENE_OPTIONS.find((o) => o.value === override) ?? SCENE_OPTIONS[0];
+
+  return (
+    <div className="scene-selector" ref={ref}>
+      <button
+        className="scene-pill"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title="Change background scene"
+      >
+        <span className="material-symbols-outlined scene-pill-icon" style={{ fontSize: 16 }}>
+          {current.icon}
+        </span>
+        <span className="scene-pill-label">{current.label}</span>
+        <span className="material-symbols-outlined scene-pill-chevron" style={{ fontSize: 14 }}>
+          {open ? 'expand_less' : 'expand_more'}
+        </span>
+      </button>
+
+      {open && (
+        <div className="scene-popover" role="listbox" aria-label="Background scene">
+          {SCENE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              role="option"
+              aria-selected={override === opt.value}
+              className={`scene-option${override === opt.value ? ' active' : ''}`}
+              onClick={() => { setOverride(opt.value); setOpen(false); }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>{opt.icon}</span>
+              <span>{opt.label}</span>
+              {override === opt.value && (
+                <span className="material-symbols-outlined scene-check" style={{ fontSize: 14 }}>check</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* ───────── Custom Tooltip ───────── */
@@ -268,6 +346,7 @@ export default function DashboardPage() {
               <span className="material-symbols-outlined" style={{ fontSize: 18 }}>play_arrow</span>
               Start Session
             </button>
+            <SceneSelector />
             <button
               id="dashboard-logout"
               className="icon-btn"
