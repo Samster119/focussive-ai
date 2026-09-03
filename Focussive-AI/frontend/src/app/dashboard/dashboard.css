@@ -728,6 +728,24 @@ html[data-time-theme='night'] .zen-dashboard .recharts-area-curve {
   stroke: #9ecfae !important;
 }
 
+/* ================= CHART GHOST OVERLAY ================= */
+.zen-dashboard .chart-no-data-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  font-style: italic;
+  text-align: center;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.22) 0%, transparent 70%);
+}
+
 /* ================= EMPTY STATE ================= */
 .zen-dashboard .empty-zen {
   text-align: center;

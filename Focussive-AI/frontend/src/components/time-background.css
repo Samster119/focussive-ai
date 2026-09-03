@@ -61,27 +61,18 @@ html[data-time-theme='night'] .tb-mist span {
 }
 
 /* ── Readability veil ──
-   Default: strong light veil so existing (light) page UIs remain
-   fully readable on top of every scene, including night. */
+   Soft gradient scrim at the top where headings and stats live,
+   leaving the main scene clear and immersive. */
 .tb-veil {
   position: absolute;
   inset: 0;
-  background: rgba(247, 249, 252, 0.6);
+  background: linear-gradient(180deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.14) 45%, rgba(255,255,255,.05) 100%);
   transition: background 2.5s ease-in-out;
 }
-html[data-time-theme='night'] .tb-veil {
-  background: rgba(240, 244, 250, 0.78);
-}
-
-/* Immersive mode (Dashboard): show the scene, keep a soft gradient
-   scrim at the top where headings and stats live. */
-body.zen-bg-override .tb-veil {
-  background: linear-gradient(180deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.14) 45%, rgba(255,255,255,.05) 100%);
-}
-html[data-time-theme='evening'] body.zen-bg-override .tb-veil {
+html[data-time-theme='evening'] .tb-veil {
   background: linear-gradient(180deg, rgba(255,250,244,.3) 0%, rgba(255,250,244,.12) 45%, rgba(255,250,244,.04) 100%);
 }
-html[data-time-theme='night'] body.zen-bg-override .tb-veil {
+html[data-time-theme='night'] .tb-veil {
   background: linear-gradient(180deg, rgba(6,10,17,.46) 0%, rgba(6,10,17,.26) 100%);
 }
 

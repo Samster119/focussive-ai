@@ -1,14 +1,16 @@
 'use client';
 
-import AppLayout from "@/components/AppLayout";
+import { useEffect } from 'react';
+import AppLayout from '@/components/AppLayout';
 import { useApi } from '@/lib/query';
 import { useAuthStore } from '@/lib/auth.store';
+import '../zen-pages.css';
 
 const milestones = [
-  { level: 1, xp: 0, name: "Explorer" },
-  { level: 2, xp: 500, name: "Achiever" },
-  { level: 3, xp: 1200, name: "Expert" },
-  { level: 4, xp: 2500, name: "Master" },
+  { level: 1, xp: 0, name: 'Explorer', icon: 'hiking' },
+  { level: 2, xp: 500, name: 'Achiever', icon: 'emoji_events' },
+  { level: 3, xp: 1200, name: 'Expert', icon: 'psychology' },
+  { level: 4, xp: 2500, name: 'Master', icon: 'auto_awesome' },
 ];
 
 export default function StoryPage() {
@@ -23,95 +25,146 @@ export default function StoryPage() {
   const currentMilestone = milestones.find((m) => m.level === currentLevel) ?? milestones[0];
   const progress = Math.min((currentXp / (nextMilestone.xp || 1)) * 100, 100);
 
+  const earnedBadges = badges.filter((b: any) => b.done).length;
+
+  /* ── Immersive background ── */
+  useEffect(() => {
+    document.body.classList.add('zen-bg-override');
+    return () => { document.body.classList.remove('zen-bg-override'); };
+  }, []);
+
   return (
     <AppLayout>
-      <div className="animate-fade-in space-y-lg">
-        <div>
-          <h1 className="font-headline-md text-headline-md font-bold text-on-surface">
-            Your Story
-          </h1>
-          <p className="font-body-sm text-on-surface-variant">
-            Badges, XP and level
-          </p>
-        </div>
+      <div className="zen-page zen-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-        <div className="bg-surface-container-lowest p-lg rounded-xl card-shadow">
-          <div className="flex items-center gap-md">
-            <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-3xl">rocket_launch</span>
+        {/* ═══════ HEADER ═══════ */}
+        <header style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div className="zen-header-icon" style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span className="material-symbols-outlined">auto_stories</span>
+          </div>
+          <div>
+            <h1 className="zen-text-primary" style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Your Story</h1>
+            <p className="zen-text-muted" style={{ fontSize: 14, margin: 0 }}>Badges, XP and level progression</p>
+          </div>
+        </header>
+
+        {/* ═══════ LEVEL PROGRESS CARD ═══════ */}
+        <div className="zen-glass zen-fade-in zd-2" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            {/* Level avatar */}
+            <div style={{
+              width: 64, height: 64, borderRadius: 18,
+              background: 'linear-gradient(135deg, var(--sage), var(--sage-deep))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 8px 24px -6px rgba(50, 82, 64, 0.4)',
+              flexShrink: 0,
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 30, color: '#fff' }}>rocket_launch</span>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <div>
-                  <span className="font-title-sm text-on-surface">Level {currentLevel}</span>
-                  <span className="font-body-sm text-on-surface-variant ml-sm">{currentMilestone.name}</span>
+                  <span className="zen-text-primary" style={{ fontSize: 18, fontWeight: 700 }}>Level {currentLevel}</span>
+                  <span className="zen-text-muted" style={{ fontSize: 14, marginLeft: 10 }}>{currentMilestone.name}</span>
                 </div>
-                <span className="font-body-sm text-on-surface-variant">
+                <span className="zen-pill" style={{ fontSize: 12 }}>
                   {currentXp} / {nextMilestone.xp} XP
                 </span>
               </div>
-              <div className="h-2 rounded-full bg-surface-container overflow-hidden mt-md">
-                <div
-                  className="h-full bg-primary rounded-full transition-all"
-                  style={{ width: `${progress}%` }}
-                />
+              {/* Progress bar */}
+              <div style={{
+                height: 8, borderRadius: 999, overflow: 'hidden',
+                background: 'var(--track)',
+              }}>
+                <div style={{
+                  height: '100%', borderRadius: 999,
+                  background: 'linear-gradient(90deg, var(--sage), var(--gold))',
+                  width: `${progress}%`,
+                  transition: 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
+                }} />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-surface-container-lowest p-lg rounded-xl card-shadow">
-          <div className="flex items-center justify-between mb-md">
-            <div className="flex items-center gap-sm">
-              <span className="material-symbols-outlined text-primary">military_tech</span>
-              <span className="font-title-sm text-on-surface">Badges</span>
+        {/* ═══════ BADGES ═══════ */}
+        <div className="zen-glass zen-fade-in zd-3" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span className="material-symbols-outlined" style={{ color: 'var(--sage)' }}>military_tech</span>
+              <span className="zen-text-primary" style={{ fontSize: 16, fontWeight: 700 }}>Badges</span>
             </div>
-            <span className="font-body-sm text-on-surface-variant">
-              {badges.filter((b: any) => b.done).length} / {badges.length}
-            </span>
+            <span className="zen-pill">{earnedBadges} / {badges.length}</span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
             {badges.map((badge: any) => (
               <div
                 key={badge.name}
-                className={`p-md rounded-xl flex flex-col items-center text-center gap-sm ${
-                  badge.done
-                    ? "bg-primary-fixed text-primary"
-                    : "bg-surface-container-low text-outline grayscale opacity-60"
-                }`}
+                className="zen-chip"
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  textAlign: 'center', gap: 8, padding: 18, borderRadius: 16,
+                  opacity: badge.done ? 1 : 0.45,
+                  filter: badge.done ? 'none' : 'grayscale(1)',
+                  background: badge.done ? 'rgba(79, 127, 102, 0.14)' : undefined,
+                  borderColor: badge.done ? 'var(--sage)' : undefined,
+                  transition: 'all 0.3s ease',
+                }}
               >
-                <span className="material-symbols-outlined text-2xl">
+                <span className="material-symbols-outlined" style={{
+                  fontSize: 28,
+                  color: badge.done ? 'var(--sage)' : 'var(--text-2)',
+                }}>
                   {badge.icon}
                 </span>
-                <span className="font-title-sm">{badge.name}</span>
-                <span className="font-label-caps opacity-80">{badge.description}</span>
+                <span className="zen-text-primary" style={{ fontSize: 13, fontWeight: 600 }}>{badge.name}</span>
+                <span className="zen-text-muted" style={{ fontSize: 11 }}>{badge.description}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-surface-container-lowest p-lg rounded-xl card-shadow">
-          <div className="flex items-center gap-sm mb-md">
-            <span className="material-symbols-outlined text-primary">emoji_events</span>
-            <span className="font-title-sm text-on-surface">Level Milestones</span>
+        {/* ═══════ LEVEL MILESTONES ═══════ */}
+        <div className="zen-glass zen-fade-in zd-4" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <span className="material-symbols-outlined" style={{ color: 'var(--sage)' }}>emoji_events</span>
+            <span className="zen-text-primary" style={{ fontSize: 16, fontWeight: 700 }}>Level Milestones</span>
           </div>
-          <div className="flex items-start justify-between">
-            {milestones.map((m, i) => (
-              <div key={m.level} className="flex flex-col items-center gap-sm flex-1">
-                <span
-                  className={`w-4 h-4 rounded-full ${
-                    currentXp >= m.xp
-                      ? "bg-primary"
-                      : "bg-surface-container-high border border-outline"
-                  }`}
-                />
-                <span className="font-title-sm text-on-surface">Level {m.level}</span>
-                <span className="font-label-caps text-on-surface-variant">{m.name}</span>
-                {i < milestones.length - 1 && (
-                  <span className="h-px w-full bg-surface-container-high absolute translate-y-[-1.5rem] ml-8 hidden" />
-                )}
-              </div>
-            ))}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative' }}>
+            {/* Connecting line */}
+            <div style={{
+              position: 'absolute', top: 14, left: '12.5%', right: '12.5%', height: 3, borderRadius: 999,
+              background: 'var(--track)',
+            }}>
+              <div style={{
+                height: '100%', borderRadius: 999,
+                background: 'linear-gradient(90deg, var(--sage), var(--gold))',
+                width: `${Math.min(100, ((currentLevel - 1) / (milestones.length - 1)) * 100)}%`,
+                transition: 'width 1s ease',
+              }} />
+            </div>
+            {milestones.map((m) => {
+              const reached = currentXp >= m.xp;
+              return (
+                <div key={m.level} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, flex: 1, position: 'relative', zIndex: 1 }}>
+                  <div style={{
+                    width: 30, height: 30, borderRadius: '50%',
+                    background: reached ? 'linear-gradient(135deg, var(--sage), var(--sage-deep))' : 'var(--chip)',
+                    border: reached ? 'none' : '2px solid var(--border)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: reached ? '0 4px 12px rgba(50, 82, 64, 0.3)' : 'none',
+                    transition: 'all 0.3s ease',
+                  }}>
+                    {reached && (
+                      <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#fff' }}>check</span>
+                    )}
+                  </div>
+                  <span className="zen-text-primary" style={{ fontSize: 13, fontWeight: 600 }}>Level {m.level}</span>
+                  <span className="zen-text-muted" style={{ fontSize: 11 }}>{m.name}</span>
+                  <span className="zen-text-muted" style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }}>{m.xp} XP</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

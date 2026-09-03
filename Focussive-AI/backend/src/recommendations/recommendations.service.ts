@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { hasGroqKey, callGroq } from '../shared/groq.helper';
+import { hasGeminiKey, callGemini } from '../shared/gemini.helper';
 
 export interface RecommendationItem { title: string; description: string; icon: string; }
 
@@ -29,12 +29,12 @@ export class RecommendationsService {
     const burnoutThreshold = settings?.burnoutThresholdScore ?? 75.0;
 
     const fallback = this.buildDataDrivenRecommendations({ pendingTasks, overdueTasks, urgentTasks, postponedTasks, calendarEvents, timetableBlocks, burnoutScore, burnoutThreshold });
-    if (!hasGroqKey()) return fallback;
+    if (!hasGeminiKey()) return fallback;
 
     const systemPrompt = `You are an AI productivity coach for Focussive AI.\nGenerate exactly 3 personalized, actionable recommendations based on REAL-TIME DATA.\nFormat: JSON object with key 'recommendations' array of objects with 'title' (max 6 words), 'description' (1-2 sentences), 'icon' (Material Symbols name).\n\nUser Data:\n- Overdue (${overdueTasks.length}): ${overdueTasks.slice(0, 3).map(t => `"${t.title}"`).join('; ') || 'None'}\n- Urgent (${urgentTasks.length}): ${urgentTasks.slice(0, 3).map(t => `"${t.title}"`).join('; ') || 'None'}\n- Pending: ${pendingTasks.length}\n- Events Today: ${calendarEvents.length}\n- Burnout: ${burnoutScore.toFixed(1)}/${burnoutThreshold}`;
 
     try {
-      const data = await callGroq({ messages: [{ role: 'system', content: systemPrompt }], temperature: 0.5 });
+      const data = await callGemini({ messages: [{ role: 'system', content: systemPrompt }], temperature: 0.5 });
       const parsed = JSON.parse(data.choices[0]?.message?.content);
       if (Array.isArray(parsed)) return parsed.slice(0, 3);
       if (parsed.recommendations && Array.isArray(parsed.recommendations)) return parsed.recommendations.slice(0, 3);

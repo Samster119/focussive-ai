@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { hasGroqKey, callGroq } from '../shared/groq.helper';
+import { hasGeminiKey, callGemini } from '../shared/gemini.helper';
 
 @Injectable()
 export class DiaryService {
@@ -30,10 +30,10 @@ export class DiaryService {
     const burnoutLevel = burnoutLogs[0]?.calculatedScore ?? 0;
 
     let summary = `(Offline Mode) You completed ${completedTasks.length} tasks and focused for ${focusTime} minutes today.`;
-    if (hasGroqKey()) {
+    if (hasGeminiKey()) {
       try {
         const prompt = `You are an empathetic AI journaling assistant.\nWrite a short, reflective 3-4 sentence diary entry summarizing the user's day based on these stats:\n- Tasks Completed: ${completedTasks.length} (out of ${tasks.length} touched today)\n- Focus Time: ${focusTime} minutes\n- Burnout Level (0-100): ${burnoutLevel}\n\nTone: Encouraging but realistic. Output ONLY the diary entry text, no markdown.`;
-        const data = await callGroq({ messages: [{ role: 'system', content: prompt }], temperature: 0.7 });
+        const data = await callGemini({ messages: [{ role: 'system', content: prompt }], temperature: 0.7 });
         summary = data.choices[0].message.content.trim();
       } catch (e) {
         this.logger.error(e);

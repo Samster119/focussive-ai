@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { hasGroqKey, callGroq, streamGroq } from '../shared/groq.helper';
+import { hasGeminiKey, callGemini, streamGemini } from '../shared/gemini.helper';
 
 interface ToolArgs {
   title?: string;
@@ -66,15 +66,15 @@ export class AssistantService {
     const messages: any[] = [...prompt, ...dbHistory.map(m => ({ role: m.sender === 'USER' ? 'user' : 'assistant', content: m.content }))];
     let reply = '';
     try {
-      if (hasGroqKey()) {
-        const initial = await callGroq({ messages, tools: TOOLS });
+      if (hasGeminiKey()) {
+        const initial = await callGemini({ messages, tools: TOOLS });
         const msg = initial.choices?.[0]?.message;
         if (msg?.tool_calls?.length) {
           messages.push({ role: 'assistant', content: msg.content, tool_calls: msg.tool_calls });
           for (const tc of msg.tool_calls) {
-            messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(await this.executeTool(userId, tc)) });
+            messages.push({ role: 'tool', name: tc.function.name, tool_call_id: tc.id, content: JSON.stringify(await this.executeTool(userId, tc)) });
           }
-          reply = await streamGroq({ messages, onToken: t => res.write(`data: ${JSON.stringify({ token: t })}\n\n`) });
+          reply = await streamGemini({ messages, onToken: t => res.write(`data: ${JSON.stringify({ token: t })}\n\n`) });
         } else {
           reply = msg?.content ?? '';
           if (reply) res.write(`data: ${JSON.stringify({ token: reply })}\n\n`);
@@ -84,7 +84,7 @@ export class AssistantService {
         res.write(`data: ${JSON.stringify({ token: reply })}\n\n`);
       }
     } catch (err) {
-      this.logger.warn(`Groq failed: ${(err as Error).message}`);
+      this.logger.warn(`Gemini failed: ${(err as Error).message}`);
       reply = this.fallbackReply(content);
       res.write(`data: ${JSON.stringify({ token: reply })}\n\n`);
     } finally {
@@ -149,13 +149,13 @@ export class AssistantService {
         return `📄 **Summary & Document Overview for "${fileName}"**\n\n` +
           `• **Total Words:** ${words.length}\n` +
           `• **Preview / Key Excerpts:**\n• ${keyLines}\n\n` +
-          `*(Note: Full LLM reasoning is available when a GROQ_API_KEY is configured in backend/.env)*`;
+          `*(Note: Full LLM reasoning is available when a GEMINI_API_KEY is configured in backend/.env)*`;
       }
       return `I received "${fileName}", but could not extract readable text from it. Please ensure it's a valid document.`;
     }
 
-    if (/(add|create|new) (a )?task/.test(l)) return `I'll add that task. Add GROQ_API_KEY to enable AI.`;
+    if (/(add|create|new) (a )?task/.test(l)) return `I'll add that task. Add GEMINI_API_KEY to enable AI.`;
     if (/(break down|micro.?step|decompose)/.test(l)) return `Micro-stepping: tasks over 120 min auto-decompose into 15-min steps.`;
-    return `I am your AI assistant. Type a message or upload a document (PDF, Word, PPT) to get started! (Add GROQ_API_KEY to backend/.env for full LLM responses)`;
+    return `I am your AI assistant. Type a message or upload a document (PDF, Word, PPT) to get started! (Add GEMINI_API_KEY to backend/.env for full LLM responses)`;
   }
 }

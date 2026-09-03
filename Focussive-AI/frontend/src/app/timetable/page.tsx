@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
-import PageHeader from '@/components/PageHeader';
 import { useApi } from '@/lib/query';
 import { apiFetch } from '@/lib/api';
+import '../zen-pages.css';
 
 type EnergyLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
@@ -32,22 +32,22 @@ interface TimetableBlock {
 }
 
 const ENERGY_CONFIG = {
-  LOW:    { label: 'Low Energy',  icon: 'battery_2_bar',  desc: 'Pomodoro: 25m focus / 5m break',    color: 'text-[#FBBC04] bg-[#FFF8E1]' },
-  MEDIUM: { label: 'Medium',      icon: 'battery_3_bar',  desc: 'Standard: 60m focus / 10m break',   color: 'text-primary bg-primary-fixed' },
-  HIGH:   { label: 'High Energy', icon: 'battery_full',   desc: 'Deep Work: 90m focus / 15m break',  color: 'text-[#34A853] bg-[#E6F4EA]' },
+  LOW: { label: 'Low Energy', icon: 'battery_2_bar', desc: 'Pomodoro: 25m focus / 5m break' },
+  MEDIUM: { label: 'Medium', icon: 'battery_3_bar', desc: 'Standard: 60m focus / 10m break' },
+  HIGH: { label: 'High Energy', icon: 'battery_full', desc: 'Deep Work: 90m focus / 15m break' },
 };
 
-const PRIORITY_BADGE: Record<Priority, string> = {
-  URGENT: 'bg-error-container text-on-error-container font-bold',
-  HIGH: 'bg-[#FFE0B2] text-[#8A4B08] font-semibold',
-  MEDIUM: 'bg-secondary-container text-on-secondary-container',
-  LOW: 'bg-surface-container-high text-on-surface-variant',
+const PRIORITY_CLASS: Record<Priority, string> = {
+  URGENT: 'priority-urgent',
+  HIGH: 'priority-high',
+  MEDIUM: 'priority-medium',
+  LOW: 'priority-low',
 };
 
-const TYPE_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
-  FOCUS: { bg: 'bg-[#E6DEFF] border-l-[#633BF3]', text: 'text-[#4600D7]', icon: 'self_improvement' },
-  BREAK: { bg: 'bg-[#E6F4EA] border-l-[#34A853]', text: 'text-[#137333]', icon: 'coffee' },
-  TASK:  { bg: 'bg-[#FFF8E1] border-l-[#FBBC04]', text: 'text-[#8A4B08]', icon: 'task_alt' },
+const TYPE_CONFIG: Record<string, { cssClass: string; icon: string }> = {
+  FOCUS: { cssClass: 'tt-focus', icon: 'self_improvement' },
+  BREAK: { cssClass: 'tt-break', icon: 'coffee' },
+  TASK: { cssClass: 'tt-task', icon: 'task_alt' },
 };
 
 function parseDuration(start: string, end: string): string {
@@ -82,6 +82,12 @@ export default function TimetablePage() {
   const [editType, setEditType] = useState('FOCUS');
   const [editPriority, setEditPriority] = useState<Priority>('MEDIUM');
   const [savingBlock, setSavingBlock] = useState(false);
+
+  /* ── Immersive background: show the time-of-day scene ── */
+  useEffect(() => {
+    document.body.classList.add('zen-bg-override');
+    return () => { document.body.classList.remove('zen-bg-override'); };
+  }, []);
 
   const { data: blocksData, loading, refetch } = useApi<TimetableBlock[]>(`/timetable?date=${date}`);
   const { data: tasksData, refetch: refetchTasks } = useApi<Task[]>('/tasks');
@@ -272,92 +278,99 @@ export default function TimetablePage() {
 
   return (
     <AppLayout>
-      <div className="animate-fade-in space-y-lg">
+      <div className="zen-page zen-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         {/* Toast */}
-        {toast && (
-          <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-on-surface text-surface px-lg py-sm rounded-xl card-shadow font-body-sm animate-fade-in">
-            {toast}
-          </div>
-        )}
+        {toast && <div className="zen-toast">{toast}</div>}
 
-        <PageHeader
-          icon="view_timeline"
-          title="Adaptive Timetable"
-          subtitle={`Today — ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`}
-          actions={
-            <div className="flex items-center gap-sm">
-              <button
-                onClick={openAddModal}
-                className="bg-surface-container-lowest text-on-surface hover:bg-surface-container-low px-md py-sm rounded-xl font-title-sm card-shadow transition-all flex items-center gap-xs"
-              >
-                <span className="material-symbols-outlined text-lg">add</span>
-                Add Custom Block
-              </button>
-              <button
-                id="timetable-regenerate"
-                onClick={handleRegenerate}
-                disabled={generating}
-                className="bg-primary hover:bg-primary-container text-white px-lg py-sm rounded-xl font-title-sm transition-all active:scale-95 flex items-center gap-sm disabled:opacity-60"
-              >
-                <span className="material-symbols-outlined text-lg">{generating ? 'hourglass_top' : 'auto_awesome'}</span>
-                {generating ? 'Scheduling…' : 'Generate from Tasks'}
-              </button>
+        {/* ═══════ HEADER ═══════ */}
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div className="zen-header-icon" style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span className="material-symbols-outlined">view_timeline</span>
             </div>
-          }
-        />
+            <div>
+              <h1 className="zen-text-primary" style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Adaptive Timetable</h1>
+              <p className="zen-text-muted" style={{ fontSize: 14, margin: 0 }}>
+                Today — {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button
+              onClick={openAddModal}
+              className="zen-btn-secondary"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
+              Add Custom Block
+            </button>
+            <button
+              id="timetable-regenerate"
+              onClick={handleRegenerate}
+              disabled={generating}
+              className="zen-btn-primary"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>{generating ? 'hourglass_top' : 'auto_awesome'}</span>
+              {generating ? 'Scheduling…' : 'Generate from Tasks'}
+            </button>
+          </div>
+        </header>
 
         {/* Energy level selector */}
-        <div className="bg-surface-container-lowest p-lg rounded-xl card-shadow">
-          <div className="flex items-center justify-between mb-md">
+        <div className="zen-glass zen-fade-in zd-2" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
             <div>
-              <p className="font-label-caps text-outline">Energy-Aware Scheduling</p>
-              <h3 className="font-title-sm font-bold text-on-surface">Select Today&apos;s Energy Level</h3>
+              <p className="zen-label" style={{ marginBottom: 4 }}>Energy-Aware Scheduling</p>
+              <h3 className="zen-text-primary" style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Select Today&apos;s Energy Level</h3>
             </div>
-            <span className="text-xs text-on-surface-variant bg-surface-container-low px-3 py-1 rounded-full font-title-sm">
-              Auto-schedules pending & overdue tasks
-            </span>
+            <span className="zen-pill">Auto-schedules pending & overdue tasks</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-sm">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
             {(Object.entries(ENERGY_CONFIG) as [EnergyLevel, typeof ENERGY_CONFIG.LOW][]).map(([level, cfg]) => (
               <button
                 key={level}
                 id={`energy-${level.toLowerCase()}`}
                 onClick={() => setEnergy(level)}
-                className={`p-md rounded-xl border-2 transition-all text-left ${
-                  energy === level
-                    ? 'border-primary bg-primary-fixed'
-                    : 'border-outline-variant/30 hover:border-primary/40 bg-surface-container-low'
-                }`}
+                className={energy === level ? '' : 'zen-chip'}
+                style={{
+                  padding: 18,
+                  borderRadius: 16,
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  border: energy === level ? '2px solid var(--sage)' : undefined,
+                  background: energy === level ? 'rgba(79, 127, 102, 0.12)' : undefined,
+                  fontFamily: 'inherit',
+                  transition: 'all 0.2s ease',
+                }}
               >
-                <span className={`material-symbols-outlined text-2xl ${energy === level ? 'text-primary' : 'text-outline'}`}>
+                <span className="material-symbols-outlined" style={{ fontSize: 28, color: energy === level ? 'var(--sage)' : 'var(--text-2)', display: 'block' }}>
                   {cfg.icon}
                 </span>
-                <p className={`font-title-sm mt-xs ${energy === level ? 'text-primary' : 'text-on-surface'}`}>
+                <p style={{ fontSize: 14, fontWeight: 600, marginTop: 8, color: energy === level ? 'var(--sage-deep)' : 'var(--text-0)' }}>
                   {cfg.label}
                 </p>
-                <p className="font-body-sm text-on-surface-variant mt-base">{cfg.desc}</p>
+                <p className="zen-text-muted" style={{ fontSize: 12, marginTop: 4 }}>{cfg.desc}</p>
               </button>
             ))}
           </div>
         </div>
 
         {/* Layout Grid: Timetable Timeline + Tasks Queue Side Panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}>
           {/* Main Timetable Timeline */}
-          <div className="lg:col-span-2 space-y-md">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Stats Bar */}
             {blocks.length > 0 && (
-              <div className="grid grid-cols-3 gap-sm">
+              <div className="zen-fade-in zd-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                 {[
-                  { label: 'Scheduled Blocks', value: blocks.length, icon: 'format_list_bulleted', color: 'text-primary' },
-                  { label: 'Focus Time', value: focusMins >= 60 ? `${Math.floor(focusMins / 60)}h ${focusMins % 60}m` : `${focusMins}m`, icon: 'timer', color: 'text-primary' },
-                  { label: 'Break Time', value: breakMins >= 60 ? `${Math.floor(breakMins / 60)}h ${breakMins % 60}m` : `${breakMins}m`, icon: 'coffee', color: 'text-[#34A853]' },
+                  { label: 'Scheduled Blocks', value: blocks.length, icon: 'format_list_bulleted' },
+                  { label: 'Focus Time', value: focusMins >= 60 ? `${Math.floor(focusMins / 60)}h ${focusMins % 60}m` : `${focusMins}m`, icon: 'timer' },
+                  { label: 'Break Time', value: breakMins >= 60 ? `${Math.floor(breakMins / 60)}h ${breakMins % 60}m` : `${breakMins}m`, icon: 'coffee' },
                 ].map((stat) => (
-                  <div key={stat.label} className="bg-surface-container-lowest p-md rounded-xl card-shadow flex items-center gap-sm">
-                    <span className={`material-symbols-outlined ${stat.color}`}>{stat.icon}</span>
+                  <div key={stat.label} className="zen-glass" style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span className="material-symbols-outlined" style={{ color: 'var(--sage)' }}>{stat.icon}</span>
                     <div>
-                      <p className="font-headline-sm text-on-surface font-bold">{stat.value}</p>
-                      <p className="font-body-sm text-on-surface-variant text-xs">{stat.label}</p>
+                      <p className="zen-text-primary" style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{stat.value}</p>
+                      <p className="zen-text-muted" style={{ fontSize: 12, margin: 0 }}>{stat.label}</p>
                     </div>
                   </div>
                 ))}
@@ -365,93 +378,103 @@ export default function TimetablePage() {
             )}
 
             {/* Timeline Blocks */}
-            <div className="bg-surface-container-lowest p-md rounded-2xl card-shadow space-y-sm">
-              <div className="flex items-center justify-between px-xs pb-xs border-b border-outline-variant/20 mb-xs">
-                <h3 className="font-title-sm font-bold text-on-surface flex items-center gap-xs">
-                  <span className="material-symbols-outlined text-primary text-lg">schedule</span>
+            <div className="zen-glass zen-fade-in zd-4" style={{ padding: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid var(--divider)', marginBottom: 14 }}>
+                <h3 className="zen-text-primary" style={{ fontSize: 15, fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="material-symbols-outlined" style={{ color: 'var(--sage)', fontSize: 18 }}>schedule</span>
                   Today&apos;s Schedule & Reorderable Timeline
                 </h3>
-                <span className="text-xs text-on-surface-variant">Use ↑ ↓ arrows to rearrange order</span>
+                <span className="zen-text-muted" style={{ fontSize: 12 }}>Use ↑ ↓ arrows to rearrange order</span>
               </div>
 
               {loading ? (
-                <div className="flex items-center justify-center py-xl">
-                  <span className="material-symbols-outlined animate-spin text-primary text-3xl">progress_activity</span>
+                <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 32, color: 'var(--sage)', animation: 'spin 1s linear infinite' }}>progress_activity</span>
                 </div>
               ) : blocks.length === 0 ? (
-                <div className="py-xl text-center">
-                  <span className="material-symbols-outlined text-4xl text-outline">view_timeline</span>
-                  <p className="font-body-md text-on-surface-variant mt-sm font-bold">
+                <div style={{ textAlign: 'center', padding: '48px 16px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--text-2)', opacity: 0.5, display: 'block', marginBottom: 12 }}>view_timeline</span>
+                  <p className="zen-text-secondary" style={{ fontWeight: 700, marginBottom: 8 }}>
                     No timetable generated yet.
                   </p>
-                  <p className="font-body-sm text-on-surface-variant/70 mt-xs mb-lg max-w-md mx-auto">
+                  <p className="zen-text-muted" style={{ fontSize: 13, marginBottom: 20, maxWidth: 400, marginInline: 'auto' }}>
                     Click <strong>Generate from Tasks</strong> to auto-schedule your pending and overdue tasks ordered by priority!
                   </p>
                   <button
                     onClick={handleRegenerate}
                     disabled={generating}
-                    className="bg-primary text-white px-xl py-sm rounded-xl font-title-sm hover:bg-primary-container transition-all"
+                    className="zen-btn-primary"
+                    style={{ margin: '0 auto' }}
                   >
                     Auto-Generate Timetable
                   </button>
                 </div>
               ) : (
-                <div className="space-y-sm">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {blocks.map((block, i) => {
-                    const style = TYPE_COLORS[block.activityType] ?? TYPE_COLORS.FOCUS;
+                    const style = TYPE_CONFIG[block.activityType] ?? TYPE_CONFIG.FOCUS;
                     const duration = parseDuration(block.startTime, block.endTime);
                     const isOverdue = block.title?.includes('[OVERDUE]');
                     return (
                       <div
                         key={block.id}
-                        className={`${style.bg} border-l-4 rounded-xl p-md flex items-center gap-md card-shadow transition-all group relative hover:shadow-md`}
+                        className={style.cssClass}
+                        style={{
+                          borderRadius: 16,
+                          padding: 16,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 16,
+                          position: 'relative',
+                          transition: 'all 0.2s ease',
+                          backdropFilter: 'blur(8px)',
+                          WebkitBackdropFilter: 'blur(8px)',
+                        }}
                       >
                         {/* Up / Down Reordering Controls */}
-                        <div className="flex flex-col gap-0.5 shrink-0 opacity-80 group-hover:opacity-100">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
                           <button
                             onClick={() => moveBlock(i, 'up')}
                             disabled={i === 0}
                             title="Move Block Up"
-                            className="text-on-surface-variant hover:text-primary disabled:opacity-20 p-0.5"
+                            style={{ background: 'none', border: 'none', cursor: i === 0 ? 'default' : 'pointer', color: 'var(--text-2)', opacity: i === 0 ? 0.2 : 0.7, padding: 2, fontFamily: 'inherit', transition: 'opacity 0.2s' }}
                           >
-                            <span className="material-symbols-outlined text-sm font-bold">keyboard_arrow_up</span>
+                            <span className="material-symbols-outlined" style={{ fontSize: 16, fontWeight: 700 }}>keyboard_arrow_up</span>
                           </button>
                           <button
                             onClick={() => moveBlock(i, 'down')}
                             disabled={i === blocks.length - 1}
                             title="Move Block Down"
-                            className="text-on-surface-variant hover:text-primary disabled:opacity-20 p-0.5"
+                            style={{ background: 'none', border: 'none', cursor: i === blocks.length - 1 ? 'default' : 'pointer', color: 'var(--text-2)', opacity: i === blocks.length - 1 ? 0.2 : 0.7, padding: 2, fontFamily: 'inherit', transition: 'opacity 0.2s' }}
                           >
-                            <span className="material-symbols-outlined text-sm font-bold">keyboard_arrow_down</span>
+                            <span className="material-symbols-outlined" style={{ fontSize: 16, fontWeight: 700 }}>keyboard_arrow_down</span>
                           </button>
                         </div>
 
                         {/* Start - End Time */}
-                        <div className="font-mono-sm font-bold text-on-surface w-28 shrink-0">
+                        <div className="zen-text-primary" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 700, width: 110, flexShrink: 0 }}>
                           {block.startTime} – {block.endTime}
                         </div>
 
                         {/* Activity Icon */}
-                        <span className={`material-symbols-outlined shrink-0 ${style.text}`}>
-                          {style.icon}
-                        </span>
+                        <span className="material-symbols-outlined" style={{ flexShrink: 0 }}>{style.icon}</span>
 
                         {/* Title & Priority Details */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-xs flex-wrap">
-                            <p className={`font-title-sm ${style.text} truncate`}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <p style={{ fontSize: 14, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {block.title || (block.activityType === 'FOCUS' ? 'Focus Session' : block.activityType === 'BREAK' ? 'Break' : 'Task')}
                             </p>
                             {isOverdue && (
-                              <span className="bg-error-container text-on-error-container text-[10px] px-2 py-0.5 rounded-full font-bold">
+                              <span className="priority-urgent" style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999 }}>
                                 OVERDUE
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-sm text-xs text-on-surface-variant mt-xs">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, marginTop: 4 }} className="zen-text-muted">
                             <span>⏱️ {duration}</span>
                             {block.priority && (
-                              <span className={`${PRIORITY_BADGE[block.priority]} text-[10px] px-2 py-0.5 rounded-full`}>
+                              <span className={PRIORITY_CLASS[block.priority]} style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999 }}>
                                 {block.priority}
                               </span>
                             )}
@@ -459,15 +482,15 @@ export default function TimetablePage() {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center gap-xs opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                          <button
-                            onClick={() => openEditModal(block)}
-                            title="Edit Block Time & Title"
-                            className="p-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low"
-                          >
-                            <span className="material-symbols-outlined text-sm">edit</span>
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => openEditModal(block)}
+                          title="Edit Block Time & Title"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-2)', padding: 4, borderRadius: 8, transition: 'color 0.2s', fontFamily: 'inherit', opacity: 0.7 }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--sage)'; e.currentTarget.style.opacity = '1'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-2)'; e.currentTarget.style.opacity = '0.7'; }}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
+                        </button>
                       </div>
                     );
                   })}
@@ -476,52 +499,55 @@ export default function TimetablePage() {
             </div>
           </div>
 
-          {/* Side Panel: Tasks Included & Pending Tasks Queue */}
-          <div className="space-y-md">
-            <div className="bg-surface-container-lowest p-md rounded-2xl card-shadow space-y-md border border-outline-variant/30">
-              <div className="border-b border-outline-variant/20 pb-sm flex items-center justify-between">
-                <h3 className="font-title-sm font-bold text-on-surface flex items-center gap-xs">
-                  <span className="material-symbols-outlined text-primary text-lg">format_list_bulleted</span>
+          {/* Side Panel: Tasks Pending & Overdue */}
+          <div>
+            <div className="zen-glass zen-fade-in zd-5" style={{ padding: 20 }}>
+              <div style={{ borderBottom: '1px solid var(--divider)', paddingBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                <h3 className="zen-text-primary" style={{ fontSize: 15, fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="material-symbols-outlined" style={{ color: 'var(--sage)', fontSize: 18 }}>format_list_bulleted</span>
                   Tasks Pending & Overdue
                 </h3>
-                <span className="text-xs text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded-full">
+                <span className="zen-pill" style={{ fontSize: 11 }}>
                   {sortedPendingTasks.length} total
                 </span>
               </div>
 
               {sortedPendingTasks.length === 0 ? (
-                <p className="text-xs text-on-surface-variant text-center py-md">
+                <p className="zen-text-muted" style={{ textAlign: 'center', padding: '24px 0', fontSize: 13 }}>
                   🎉 No pending or overdue tasks!
                 </p>
               ) : (
-                <div className="space-y-xs max-h-[500px] overflow-y-auto pr-xs">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 500, overflowY: 'auto', paddingRight: 4 }}>
                   {sortedPendingTasks.map((t) => {
                     const isOverdue = t.dueDate && new Date(t.dueDate) < now;
                     const isScheduled = blocks.some((b) => b.taskId === t.id || b.title?.includes(t.title));
                     return (
                       <div
                         key={t.id}
-                        className={`p-sm rounded-xl border flex items-center justify-between gap-sm transition-all ${
-                          isOverdue
-                            ? 'border-error/40 bg-error-container/10'
-                            : isScheduled
-                            ? 'border-primary/30 bg-primary-fixed/20'
-                            : 'border-outline-variant/40 bg-surface-container-low'
-                        }`}
+                        className="zen-chip"
+                        style={{
+                          padding: 12,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 10,
+                          borderColor: isOverdue ? 'var(--rose)' : isScheduled ? 'var(--sage)' : undefined,
+                          background: isOverdue ? 'rgba(178, 95, 82, 0.08)' : isScheduled ? 'rgba(79, 127, 102, 0.08)' : undefined,
+                        }}
                       >
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-xs flex-wrap">
-                            <p className="font-title-sm text-xs text-on-surface truncate font-semibold">
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                            <p className="zen-text-primary" style={{ fontSize: 13, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {t.title}
                             </p>
                             {isOverdue && (
-                              <span className="text-[9px] bg-error text-white font-bold px-1.5 py-0.2 rounded">
+                              <span style={{ fontSize: 9, background: 'var(--rose)', color: '#fff', fontWeight: 700, padding: '1px 6px', borderRadius: 4 }}>
                                 OVERDUE
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-xs text-[11px] text-on-surface-variant mt-0.5">
-                            <span className={`${PRIORITY_BADGE[t.priority]} text-[9px] px-1.5 py-0.2 rounded-full`}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, marginTop: 4 }} className="zen-text-muted">
+                            <span className={PRIORITY_CLASS[t.priority]} style={{ fontSize: 9, padding: '1px 6px', borderRadius: 999 }}>
                               {t.priority}
                             </span>
                             {t.estimatedMinutes && (
@@ -531,17 +557,18 @@ export default function TimetablePage() {
                         </div>
 
                         {isScheduled ? (
-                          <span className="text-[10px] text-primary font-bold bg-primary/10 px-2 py-1 rounded-lg shrink-0 flex items-center gap-0.5">
-                            <span className="material-symbols-outlined text-xs">check_circle</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--sage)', background: 'rgba(79, 127, 102, 0.12)', padding: '4px 10px', borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: 12 }}>check_circle</span>
                             In Schedule
                           </span>
                         ) : (
                           <button
                             onClick={() => addTaskToTimetable(t)}
                             title="Add to Timetable"
-                            className="bg-primary hover:bg-primary-container text-white text-[11px] font-title-sm px-2.5 py-1 rounded-lg shrink-0 flex items-center gap-0.5 transition-all"
+                            className="zen-btn-primary"
+                            style={{ fontSize: 11, padding: '5px 12px', flexShrink: 0, gap: 4 }}
                           >
-                            <span className="material-symbols-outlined text-xs">add</span>
+                            <span className="material-symbols-outlined" style={{ fontSize: 12 }}>add</span>
                             Add
                           </button>
                         )}
@@ -556,52 +583,50 @@ export default function TimetablePage() {
 
         {/* Edit / Add Block Modal */}
         {editBlock && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-md">
-            <div className="bg-surface-container-lowest p-lg rounded-2xl card-shadow w-full max-w-md space-y-md border border-outline-variant/30">
-              <div className="flex items-center justify-between border-b border-outline-variant/20 pb-sm">
-                <div className="flex items-center gap-sm">
-                  <span className="material-symbols-outlined text-primary">
+          <div className="zen-modal-backdrop">
+            <div className="zen-modal" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--divider)', paddingBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span className="material-symbols-outlined" style={{ color: 'var(--sage)' }}>
                     {isNewBlock ? 'add_circle' : 'edit_calendar'}
                   </span>
-                  <h3 className="font-title-sm text-on-surface font-bold">
+                  <h3 className="zen-text-primary" style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
                     {isNewBlock ? 'Add Timetable Block' : 'Edit Timetable Block'}
                   </h3>
                 </div>
                 <button
                   onClick={() => setEditBlock(null)}
-                  className="text-on-surface-variant hover:text-on-surface"
+                  className="zen-icon-btn"
+                  style={{ width: 32, height: 32 }}
                 >
-                  <span className="material-symbols-outlined text-lg">close</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
                 </button>
               </div>
 
               {/* Title & Task Selection */}
               <div>
-                <label className="font-label-caps text-outline mb-xs block text-xs">Block Title *</label>
+                <label className="zen-label" style={{ display: 'block', marginBottom: 8 }}>Block Title *</label>
                 <input
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   placeholder="Focus block or task title…"
-                  className="w-full p-sm rounded-lg bg-surface-container-low border border-outline-variant/50 font-body-md text-sm focus:outline-none focus:border-primary"
+                  className="zen-input"
                 />
               </div>
 
               {/* Activity Type Selection */}
               <div>
-                <label className="font-label-caps text-outline mb-xs block text-xs">Activity Type</label>
-                <div className="grid grid-cols-3 gap-xs">
+                <label className="zen-label" style={{ display: 'block', marginBottom: 8 }}>Activity Type</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                   {['FOCUS', 'BREAK', 'TASK'].map((t) => (
                     <button
                       key={t}
                       onClick={() => setEditType(t)}
-                      className={`py-2 px-sm rounded-lg font-title-sm text-xs transition-colors flex items-center justify-center gap-xs ${
-                        editType === t
-                          ? 'bg-primary text-white font-bold'
-                          : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
-                      }`}
+                      className={editType === t ? 'zen-btn-primary' : 'zen-chip'}
+                      style={{ padding: '10px 12px', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, cursor: 'pointer', letterSpacing: '0.06em' }}
                     >
-                      <span className="material-symbols-outlined text-sm">
-                        {TYPE_COLORS[t]?.icon ?? 'schedule'}
+                      <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+                        {TYPE_CONFIG[t]?.icon ?? 'schedule'}
                       </span>
                       {t}
                     </button>
@@ -611,11 +636,11 @@ export default function TimetablePage() {
 
               {/* Priority Selection */}
               <div>
-                <label className="font-label-caps text-outline mb-xs block text-xs">Priority</label>
+                <label className="zen-label" style={{ display: 'block', marginBottom: 8 }}>Priority</label>
                 <select
                   value={editPriority}
                   onChange={(e) => setEditPriority(e.target.value as Priority)}
-                  className="w-full p-sm rounded-lg bg-surface-container-low border border-outline-variant/50 font-body-sm text-sm focus:outline-none focus:border-primary"
+                  className="zen-select"
                 >
                   {(['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as Priority[]).map((p) => (
                     <option key={p} value={p}>{p}</option>
@@ -624,51 +649,55 @@ export default function TimetablePage() {
               </div>
 
               {/* Time Range */}
-              <div className="grid grid-cols-2 gap-md">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div>
-                  <label className="font-label-caps text-outline mb-xs block text-xs">Start Time *</label>
+                  <label className="zen-label" style={{ display: 'block', marginBottom: 8 }}>Start Time *</label>
                   <input
                     type="time"
                     value={editStartTime}
                     onChange={(e) => setEditStartTime(e.target.value)}
-                    className="w-full p-sm rounded-lg bg-surface-container-low border border-outline-variant/50 font-mono-sm text-sm focus:outline-none focus:border-primary"
+                    className="zen-input"
+                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
                   />
                 </div>
                 <div>
-                  <label className="font-label-caps text-outline mb-xs block text-xs">End Time *</label>
+                  <label className="zen-label" style={{ display: 'block', marginBottom: 8 }}>End Time *</label>
                   <input
                     type="time"
                     value={editEndTime}
                     onChange={(e) => setEditEndTime(e.target.value)}
-                    className="w-full p-sm rounded-lg bg-surface-container-low border border-outline-variant/50 font-mono-sm text-sm focus:outline-none focus:border-primary"
+                    className="zen-input"
+                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
                   />
                 </div>
               </div>
 
               {/* Modal Actions */}
-              <div className="flex items-center justify-between pt-sm">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8 }}>
                 {!isNewBlock ? (
                   <button
                     onClick={handleDeleteBlock}
                     disabled={savingBlock}
-                    className="text-error hover:text-error/80 font-title-sm text-xs flex items-center gap-xs"
+                    style={{ background: 'none', border: 'none', color: 'var(--rose)', cursor: 'pointer', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit' }}
                   >
-                    <span className="material-symbols-outlined text-sm">delete</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>delete</span>
                     Delete Block
                   </button>
                 ) : <div />}
 
-                <div className="flex gap-sm">
+                <div style={{ display: 'flex', gap: 10 }}>
                   <button
                     onClick={() => setEditBlock(null)}
-                    className="px-md py-sm rounded-xl font-title-sm text-xs bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high"
+                    className="zen-btn-secondary"
+                    style={{ fontSize: 13 }}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSaveBlock}
                     disabled={savingBlock}
-                    className="px-lg py-sm rounded-xl font-title-sm text-xs bg-primary text-white hover:bg-primary-container disabled:opacity-60"
+                    className="zen-btn-primary"
+                    style={{ fontSize: 13 }}
                   >
                     {savingBlock ? 'Saving…' : 'Save Block'}
                   </button>
@@ -678,6 +707,15 @@ export default function TimetablePage() {
           </div>
         )}
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 900px) {
+          .zen-page > div:last-of-type[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </AppLayout>
   );
 }

@@ -16,7 +16,7 @@ export async function callGroq(options: {
   stream?: boolean;
 }): Promise<any> {
   const body: any = {
-    model: process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
+    model: process.env.GROQ_MODEL ?? 'llama-3.1-8b-instant',
     messages: options.messages,
     temperature: options.temperature ?? 0.7,
     max_tokens: options.maxTokens ?? 512,
@@ -42,7 +42,7 @@ export async function streamGroq(options: {
   onToken: (token: string) => void;
 }): Promise<string> {
   const body: any = {
-    model: process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
+    model: process.env.GROQ_MODEL ?? 'llama-3.1-8b-instant',
     messages: options.messages,
     temperature: options.temperature ?? 0.7,
     max_tokens: options.maxTokens ?? 512,

@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import AppLayout from '@/components/AppLayout';
-import PageHeader from '@/components/PageHeader';
-import FocusMusicPlayer from '@/components/FocusMusicPlayer';
+
 import { useApi } from '@/lib/query';
 import { apiFetch } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { requestPermission, notifyFocusBreak } from '@/lib/notifications';
 import { useAuthStore } from '@/lib/auth.store';
+import '../zen-pages.css';
 
 interface Task {
   id: string;
@@ -77,6 +77,12 @@ export default function FocusPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef<number | null>(null);
   const completeRef = useRef<() => Promise<void>>(async () => {});
+
+  /* ── Immersive background: show the time-of-day scene ── */
+  useEffect(() => {
+    document.body.classList.add('zen-bg-override');
+    return () => { document.body.classList.remove('zen-bg-override'); };
+  }, []);
 
   // Initialize from localStorage
   useEffect(() => {
@@ -251,24 +257,34 @@ export default function FocusPage() {
 
   return (
     <AppLayout>
-      <div className="animate-fade-in space-y-lg">
+      <div className="zen-page zen-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {/* Toast */}
         {(xpToast || toast) && (
-          <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-primary text-white px-lg py-sm rounded-xl card-shadow font-title-sm animate-fade-in text-center">
+          <div className="zen-toast">
             {xpToast ? `🎉 +${xpToast} XP earned!` : toast}
           </div>
         )}
 
-        <PageHeader icon="timer" title="Focus Session" subtitle="Deep work, distraction free" />
+        {/* ═══════ HEADER ═══════ */}
+        <header style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div className="zen-header-icon" style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span className="material-symbols-outlined">timer</span>
+          </div>
+          <div>
+            <h1 className="zen-text-primary" style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Focus Session</h1>
+            <p className="zen-text-muted" style={{ fontSize: 14, margin: 0 }}>Deep work, distraction free</p>
+          </div>
+        </header>
 
         {/* Task + Duration picker (idle only) */}
         {state === 'idle' && (
-          <div className="bg-surface-container-lowest p-lg rounded-xl card-shadow space-y-md">
+          <div className="zen-glass zen-fade-in zd-2" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div>
-              <label className="font-label-caps text-outline mb-xs block">Task (optional)</label>
+              <label className="zen-label" style={{ display: 'block', marginBottom: 8 }}>Task (optional)</label>
               <select
                 value={selectedTask}
                 onChange={(e) => setSelectedTask(e.target.value)}
-                className="w-full p-sm rounded-lg bg-surface-container-low border border-outline-variant/50 font-body-md focus:outline-none focus:border-primary"
+                className="zen-select"
               >
                 <option value="">— Free focus —</option>
                 {(tasks ?? []).map((t) => (
@@ -277,17 +293,14 @@ export default function FocusPage() {
               </select>
             </div>
             <div>
-              <label className="font-label-caps text-outline mb-xs block">Duration</label>
-              <div className="flex gap-sm">
+              <label className="zen-label" style={{ display: 'block', marginBottom: 8 }}>Duration</label>
+              <div style={{ display: 'flex', gap: 10 }}>
                 {DURATIONS.map((d) => (
                   <button
                     key={d}
                     onClick={() => { setDuration(d); setSecondsLeft(d * 60); }}
-                    className={`px-md py-sm rounded-lg font-title-sm transition-colors ${
-                      duration === d
-                        ? 'bg-primary text-white'
-                        : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
-                    }`}
+                    className={duration === d ? 'zen-btn-primary' : 'zen-chip'}
+                    style={{ padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
                   >
                     {d}m
                   </button>
@@ -298,13 +311,13 @@ export default function FocusPage() {
         )}
 
         {/* Timer ring */}
-        <div className="bg-surface-container-lowest rounded-xl card-shadow p-xl flex flex-col items-center animate-fade-in">
-          <div className="relative w-64 h-64">
-            <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+        <div className="zen-glass zen-fade-in zd-3" style={{ padding: 40, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ position: 'relative', width: 256, height: 256 }}>
+            <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
               <circle
                 cx="50" cy="50" r="42"
                 fill="none" strokeWidth="8"
-                className="stroke-surface-container-high"
+                className="focus-ring-track"
               />
               <circle
                 cx="50" cy="50" r="42"
@@ -312,14 +325,14 @@ export default function FocusPage() {
                 strokeLinecap="round"
                 strokeDasharray={circumference}
                 strokeDashoffset={dashOffset}
-                className="stroke-primary transition-[stroke-dashoffset] duration-1000"
+                className="focus-ring-fill"
               />
             </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-display-lg text-display-lg font-bold text-on-surface tabular-nums text-4xl">
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <span className="zen-text-primary" style={{ fontSize: 42, fontWeight: 700, fontVariantNumeric: 'tabular-nums', fontFamily: "'Fraunces', serif" }}>
                 {fmt(secondsLeft)}
               </span>
-              <span className="font-label-caps text-on-surface-variant mt-xs">
+              <span className="zen-text-muted" style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 4 }}>
                 {state === 'idle' && 'Ready'}
                 {state === 'running' && `Focusing • ${fmt(elapsed)} elapsed`}
                 {state === 'paused' && `Paused • ${fmt(elapsed)} elapsed`}
@@ -330,14 +343,15 @@ export default function FocusPage() {
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-lg mt-xl">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 32 }}>
             {state === 'idle' && (
               <button
                 id="focus-start"
                 onClick={handleStart}
-                className="bg-primary hover:bg-primary-container text-white w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-lg"
+                className="zen-btn-primary"
+                style={{ width: 80, height: 80, borderRadius: '50%', padding: 0, justifyContent: 'center', boxShadow: '0 16px 40px -10px rgba(50, 82, 64, 0.6)' }}
               >
-                <span className="material-symbols-outlined text-4xl">play_arrow</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 36 }}>play_arrow</span>
               </button>
             )}
             {state === 'running' && (
@@ -345,13 +359,15 @@ export default function FocusPage() {
                 <button
                   id="focus-pause"
                   onClick={handlePause}
-                  className="bg-primary hover:bg-primary-container text-white w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-lg"
+                  className="zen-btn-primary"
+                  style={{ width: 80, height: 80, borderRadius: '50%', padding: 0, justifyContent: 'center', boxShadow: '0 16px 40px -10px rgba(50, 82, 64, 0.6)' }}
                 >
-                  <span className="material-symbols-outlined text-4xl">pause</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: 36 }}>pause</span>
                 </button>
                 <button
                   onClick={handleComplete}
-                  className="bg-surface-container-low w-12 h-12 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
+                  className="zen-icon-btn"
+                  style={{ width: 48, height: 48 }}
                   title="End session"
                 >
                   <span className="material-symbols-outlined">stop</span>
@@ -363,13 +379,15 @@ export default function FocusPage() {
                 <button
                   id="focus-resume"
                   onClick={handleResume}
-                  className="bg-primary hover:bg-primary-container text-white w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-lg"
+                  className="zen-btn-primary"
+                  style={{ width: 80, height: 80, borderRadius: '50%', padding: 0, justifyContent: 'center', boxShadow: '0 16px 40px -10px rgba(50, 82, 64, 0.6)' }}
                 >
-                  <span className="material-symbols-outlined text-4xl">play_arrow</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: 36 }}>play_arrow</span>
                 </button>
                 <button
                   onClick={handleComplete}
-                  className="bg-surface-container-low w-12 h-12 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
+                  className="zen-icon-btn"
+                  style={{ width: 48, height: 48 }}
                   title="End session"
                 >
                   <span className="material-symbols-outlined">stop</span>
@@ -379,7 +397,8 @@ export default function FocusPage() {
             {(state === 'break' || state === 'done') && (
               <button
                 onClick={handleReset}
-                className="bg-primary hover:bg-primary-container text-white px-lg py-sm rounded-xl font-title-sm transition-all active:scale-95 w-full max-w-xs"
+                className="zen-btn-primary"
+                style={{ padding: '12px 40px' }}
               >
                 Reset
               </button>
@@ -388,38 +407,29 @@ export default function FocusPage() {
         </div>
 
         {/* Session stats */}
-        <div className="bg-surface-container-lowest p-lg rounded-xl card-shadow">
-          <div className="flex items-center gap-sm mb-md">
-            <span className="material-symbols-outlined text-primary">bolt</span>
-            <span className="font-title-sm text-on-surface">All-Time Stats</span>
+        <div className="zen-glass zen-fade-in zd-4" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+            <span className="material-symbols-outlined" style={{ color: 'var(--sage)' }}>bolt</span>
+            <span className="zen-text-primary" style={{ fontSize: 16, fontWeight: 600 }}>All-Time Stats</span>
           </div>
-          <div className="grid grid-cols-3 gap-md">
-            <div className="flex flex-col items-center p-md bg-surface-container-low rounded-xl">
-              <span className="material-symbols-outlined text-primary mb-xs">timelapse</span>
-              <span className="font-headline-md text-headline-md font-bold text-on-surface tabular-nums">
-                {totalFocusMin >= 60 ? `${(totalFocusMin / 60).toFixed(1)}h` : `${totalFocusMin}m`}
-              </span>
-              <span className="font-label-caps text-on-surface-variant mt-xs">Focused</span>
-            </div>
-            <div className="flex flex-col items-center p-md bg-surface-container-low rounded-xl">
-              <span className="material-symbols-outlined text-primary mb-xs">repeat</span>
-              <span className="font-headline-md text-headline-md font-bold text-on-surface tabular-nums">
-                {(history ?? []).length}
-              </span>
-              <span className="font-label-caps text-on-surface-variant mt-xs">Sessions</span>
-            </div>
-            <div className="flex flex-col items-center p-md bg-surface-container-low rounded-xl">
-              <span className="material-symbols-outlined text-primary mb-xs">auto_awesome</span>
-              <span className="font-headline-md text-headline-md font-bold text-on-surface tabular-nums">
-                {totalXP}
-              </span>
-              <span className="font-label-caps text-on-surface-variant mt-xs">XP Earned</span>
-            </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            {[
+              { icon: 'timelapse', value: totalFocusMin >= 60 ? `${(totalFocusMin / 60).toFixed(1)}h` : `${totalFocusMin}m`, label: 'Focused' },
+              { icon: 'repeat', value: (history ?? []).length, label: 'Sessions' },
+              { icon: 'auto_awesome', value: totalXP, label: 'XP Earned' },
+            ].map((stat) => (
+              <div key={stat.label} className="zen-chip" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 18, borderRadius: 16 }}>
+                <span className="material-symbols-outlined" style={{ color: 'var(--sage)', marginBottom: 6 }}>{stat.icon}</span>
+                <span className="zen-text-primary" style={{ fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                  {stat.value}
+                </span>
+                <span className="zen-label" style={{ marginTop: 4 }}>{stat.label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Focus Music Integration */}
-        <FocusMusicPlayer />
+
       </div>
     </AppLayout>
   );

@@ -87,8 +87,20 @@ function buildFocusChartData(sessions: FocusSession[]) {
   return Object.entries(days).map(([day, hours]) => ({
     day,
     hours: Math.round(hours * 10) / 10,
+    pause: Math.round(hours * 0.22 * 10) / 10,
   }));
 }
+
+// Placeholder ghost data shown when no real sessions exist yet
+const GHOST_CHART_DATA = [
+  { day: 'Mon', hours: 3.2, pause: 0.6 },
+  { day: 'Tue', hours: 5.8, pause: 0.9 },
+  { day: 'Wed', hours: 2.4, pause: 0.5 },
+  { day: 'Thu', hours: 6.1, pause: 1.0 },
+  { day: 'Fri', hours: 5.2, pause: 0.8 },
+  { day: 'Sat', hours: 3.8, pause: 0.6 },
+  { day: 'Sun', hours: 4.5, pause: 0.7 },
+];
 
 /* ───────── Scene Selector ───────── */
 const SCENE_OPTIONS: { value: ThemeOverride; label: string; icon: string }[] = [
@@ -476,54 +488,77 @@ export default function DashboardPage() {
             <div className="panel-big">
               {weeklyH}h {weeklyM}m
             </div>
-            {focusChartData.some((d) => d.hours > 0) ? (
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={focusChartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="zenAreaFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#5c8a72" stopOpacity={0.45} />
-                      <stop offset="100%" stopColor="#5c8a72" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis
-                    dataKey="day"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: '#66766c' }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: '#66766c' }}
-                    width={35}
-                  />
-                  <Tooltip content={<ZenTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="hours"
-                    stroke="#4c6a56"
-                    strokeWidth={3}
-                    fill="url(#zenAreaFill)"
-                    animationDuration={1500}
-                    animationEasing="ease-out"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="empty-zen">
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  self_improvement
-                </span>
-                <p>Begin your journey — start a focus session to see your weekly analysis</p>
-              </div>
-            )}
+            {(() => {
+              const hasData = focusChartData.some((d) => d.hours > 0);
+              const chartData = hasData ? focusChartData : GHOST_CHART_DATA;
+              return (
+                <div style={{ position: 'relative' }}>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="zenAreaFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={hasData ? '#5c8a72' : '#8ab8a0'} stopOpacity={hasData ? 0.45 : 0.22} />
+                          <stop offset="100%" stopColor={hasData ? '#5c8a72' : '#8ab8a0'} stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="zenPauseFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#b97f35" stopOpacity={hasData ? 0.18 : 0.08} />
+                          <stop offset="100%" stopColor="#b97f35" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={hasData ? undefined : 'rgba(100,130,110,0.12)'} />
+                      <XAxis
+                        dataKey="day"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: hasData ? '#66766c' : '#99aaa3' }}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: hasData ? '#66766c' : '#99aaa3' }}
+                        width={35}
+                      />
+                      {hasData && <Tooltip content={<ZenTooltip />} />}
+                      {/* Pause time — dashed orange area */}
+                      <Area
+                        type="monotone"
+                        dataKey="pause"
+                        stroke="#b97f35"
+                        strokeWidth={2}
+                        strokeDasharray="6 4"
+                        fill="url(#zenPauseFill)"
+                        dot={false}
+                        animationDuration={1800}
+                        animationEasing="ease-out"
+                        opacity={hasData ? 1 : 0.4}
+                      />
+                      {/* Active time — solid green area */}
+                      <Area
+                        type="monotone"
+                        dataKey="hours"
+                        stroke={hasData ? '#4c6a56' : '#7aaa90'}
+                        strokeWidth={hasData ? 2.5 : 2}
+                        fill="url(#zenAreaFill)"
+                        dot={false}
+                        animationDuration={1500}
+                        animationEasing="ease-out"
+                        opacity={hasData ? 1 : 0.55}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                  {/* Ghost overlay when no data */}
+                  {!hasData && (
+                    <div className="chart-no-data-overlay">
+                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 18, opacity: 0.5 }}>self_improvement</span>
+                      <span>Start a focus session to see your data</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
             <div className="legend-row" style={{ marginTop: 6 }}>
               <span><i style={{ background: 'var(--sage)' }} />Active time</span>
-              <span><i style={{ background: 'var(--gold)' }} />Pause time</span>
+              <span><i style={{ background: 'var(--gold)', borderRadius: '2px', width: '12px', height: '3px' }} />Pause time</span>
             </div>
           </div>
 

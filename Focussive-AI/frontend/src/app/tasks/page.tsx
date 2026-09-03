@@ -299,16 +299,21 @@ export default function TasksPage() {
         )}
 
         {/* ── Header ── */}
-        <div className="tasks-header zen-tasks zd-1" style={{ animationName: 'ztasks-fadeUp' }}>
-          <div>
-            <h1 className="tasks-title">Tasks</h1>
-            <div className="tasks-subtitle">Manage your work & tasks</div>
+        <header className="tasks-header zd-1" style={{ animationName: 'ztasks-fadeUp', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(79, 127, 102, 0.18)', border: '1px solid var(--border)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}>
+              <span className="material-symbols-outlined" style={{ color: 'var(--sage)' }}>task_alt</span>
+            </div>
+            <div>
+              <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, color: 'var(--text-0)' }}>Tasks</h1>
+              <p style={{ fontSize: 14, margin: 0, color: 'var(--text-2)' }}>Manage your work & tasks</p>
+            </div>
           </div>
           <button id="tasks-add-btn" className="btn-add" onClick={() => setAdding(true)}>
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
             Add Task
           </button>
-        </div>
+        </header>
 
         {/* ── Stats Row ── */}
         <div className="stats-row">
