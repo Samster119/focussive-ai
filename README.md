@@ -5,26 +5,15 @@
 ### *Adaptive Personal Productivity with NLP Task Extraction & Proactive Burnout Prevention*
 
 <p align="center">
-
-  <a href="#-visual-showcase"><img src="https://img.shields.io/badge/Status-Feature%20Complete-success?style=for-the-badge&logo=git" alt="Status" /></a>
-
-  <a href="#-tech-stack"><img src="https://img.shields.io/badge/Next.js-15.1-black?style=for-the-badge&logo=next.js" alt="Next.js" /></a>
-
-  <a href="#-tech-stack"><img src="https://img.shields.io/badge/NestJS-11.0-E0234E?style=for-the-badge&logo=nestjs" alt="NestJS" /></a>
-
-  <a href="#-tech-stack"><img src="https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript" alt="TypeScript" /></a>
-
-  <a href="#-tech-stack"><img src="https://img.shields.io/badge/Llama_3.3_70B-GroqCloud-f55036?style=for-the-badge&logo=fastapi" alt="GroqCloud" /></a>
-
-  <a href="#-tech-stack"><img src="https://img.shields.io/badge/PostgreSQL-Supabase-3ECF8E?style=for-the-badge&logo=supabase" alt="Supabase" /></a>
-
-  <a href="#-tech-stack"><img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma" alt="Prisma" /></a>
-
-  <a href="#-license"><img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License" /></a>
-
+  <a href="#-visual-showcase"><img src="https://img.shields.io/badge/Status-Feature%20Complete-success?style=for-the-badge&logo=git" alt="Status" /></a>
+  <a href="#-tech-stack"><img src="https://img.shields.io/badge/Next.js-15.1-black?style=for-the-badge&logo=next.js" alt="Next.js" /></a>
+  <a href="#-tech-stack"><img src="https://img.shields.io/badge/NestJS-11.0-E0234E?style=for-the-badge&logo=nestjs" alt="NestJS" /></a>
+  <a href="#-tech-stack"><img src="https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript" alt="TypeScript" /></a>
+  <a href="#-tech-stack"><img src="https://img.shields.io/badge/Llama_3.3_70B-GroqCloud-f55036?style=for-the-badge&logo=fastapi" alt="GroqCloud" /></a>
+  <a href="#-tech-stack"><img src="https://img.shields.io/badge/PostgreSQL-Supabase-3ECF8E?style=for-the-badge&logo=supabase" alt="Supabase" /></a>
+  <a href="#-tech-stack"><img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma" alt="Prisma" /></a>
+  <a href="#-license"><img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License" /></a>
 </p>
-
-<p align="center">
 
   <b>Focussive AI</b> replaces rigid, guilt-inducing task trackers with a shame-free, AI-driven productivity ecosystem. Using natural conversation, intelligent priority weighting, circadian energy scheduling, and automated micro-stepping, it empowers you to accomplish meaningful work without burnout.
 
