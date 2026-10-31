@@ -78,18 +78,11 @@ Explore Focussive AI in action through the dashboard overview below.
 Traditional task managers fail knowledge workers and students with ADHD or procrastination tendencies:
 
 | Traditional Productivity Tools | Focussive AI Approach |
-
 | :--- | :--- |
-
 | **Rigid Time-Blocking:** Breaks when life happens, leading to abandoned calendars. | **Adaptive Timetable:** Reschedules dynamically based on daily energy and rhythm. |
-
 | **Guilt-Driven Overdue Alerts:** Red badges and shame notifications create anxiety. | **Shame-Free Philosophy:** Zero penalties for delays; AI suggests recalibrations. |
-
 | **Overwhelming Task Monoliths:** Large tasks linger untouched for weeks. | **Micro-Stepping Engine:** Breaks paralysis-inducing tasks into 15-minute easy wins. |
-
 | **Ignored Mental Health:** Encourages endless grinding until burnout occurs. | **Algorithmic Burnout Monitor:** Halts consecutive sessions and enforces restorative breaks. |
-
----
 
 <br />
 
@@ -280,25 +273,15 @@ flowchart TD
 ## 💻 Tech Stack
 
 | Category | Technologies & Libraries |
-
 | :--- | :--- |
-
 | **Frontend Framework** | [Next.js 15.1](https://nextjs.org/) (App Router), [React 19](https://react.dev/), [TypeScript 5.7](https://www.typescriptlang.org/) |
-
 | **Styling & Design System** | [Tailwind CSS 3.4](https://tailwindcss.com/), Material Design 3 tokens, Cursor-Tracking Glow Cards |
-
 | **UI Components & Charts** | [FullCalendar 6](https://fullcalendar.io/), [Recharts 2.15](https://recharts.org/), [Lucide React](https://lucide.dev/), [Motion](https://motion.dev/) |
-
 | **Client State Management** | [Zustand 5](https://zustand-demo.pmnd.rs/) |
-
 | **Backend Framework** | [NestJS 11](https://nestjs.com/), [Node.js](https://nodejs.org/) |
-
 | **Database & ORM** | [PostgreSQL (Supabase)](https://supabase.com/), [Prisma ORM 6](https://www.prisma.io/) (15 Normalized Models) |
-
 | **AI Inference Engine** | [GroqCloud API](https://groq.com/) running `llama-3.3-70b-versatile` with Tool Calling & SSE |
-
 | **Background Notifications** | Browser Service Worker API (`sw.js`), HTML5 Web Notifications |
-
 | **Testing** | Jest unit & integration test suites (19 passing suites) |
 
 ---
@@ -532,40 +515,23 @@ npm run test
 All endpoints are prefixed with `/api/v1` and protected via JWT Bearer authentication (except Auth endpoints):
 
 | Category | Method | Endpoint | Description |
-
 | :--- | :--- | :--- | :--- |
-
 | **Auth** | `POST` | `/auth/register` | Register new user account |
-
 | | `POST` | `/auth/login` | Login and receive JWT access token |
-
 | | `GET` | `/auth/me` | Fetch authenticated user profile |
-
 | **Tasks** | `GET` | `/tasks` | List all tasks with priority tags |
-
 | | `POST` | `/tasks` | Create new prioritized task |
-
 | | `POST` | `/tasks/:id/microstep` | **Decompose task into 15-min micro-steps** |
-
 | | `POST` | `/tasks/:id/revert-microstep` | Revert micro-steps back to single task |
-
 | **Timetable** | `GET` | `/timetable` | Fetch energy-aligned timetable blocks |
-
 | | `POST` | `/timetable/regenerate` | Regenerate timetable based on energy |
-
 | **Diary** | `GET` | `/diary` | Fetch all historical diary entries |
-
 | | `POST` | `/diary/generate` | **AI-synthesize daily diary & reflections** |
-
 | **Gamification** | `GET` | `/gamification` | Fetch XP, current level, and badges |
-
-| **Recommendations**| `GET` | `/recommendations` | Context-aware AI wellness suggestions |
-
+| **Recommendations** | `GET` | `/recommendations` | Context-aware AI wellness suggestions |
 | **Reports** | `GET` | `/reports/weekly` | Weekly productivity and burnout analytics |
-
 ---
 
-<br /?
 <br />
 
 <div align="center">
