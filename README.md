@@ -56,7 +56,7 @@ Explore Focussive AI in action through the dashboard overview below.
 
   <!-- Replace with your actual image path or GitHub attachment URL -->
 
-  <img src="assets/images/dashboard.png" alt="Focussive AI Dashboard Overview" width="95%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);" />
+  <img src="Focussive-AI/assets/images/dashboard.png" alt="Focussive AI Dashboard Overview" width="95%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);" />
 
 </p>
 
